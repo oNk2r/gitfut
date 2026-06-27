@@ -6,6 +6,7 @@ import Background from "@/components/Background";
 import { fetchProfile, type GithubError } from "@/lib/github/client";
 import { signalsFromPayload } from "@/lib/github/signals";
 import { buildCard } from "@/lib/scoring/engine";
+import { SAMPLE_CARDS } from "@/lib/github/samples";
 import { countryFromHeaders } from "@/lib/ipgeo";
 import { needsIpFallback, pickFlag } from "@/lib/flagPriority";
 import type { Card } from "@/lib/scoring/types";
@@ -16,6 +17,12 @@ export const dynamic = "force-dynamic"; // per-user, token-gated, always fresh
 // Memoised per request so generateMetadata and the page share one fetch.
 const loadCard = cache(
   async (username: string): Promise<{ card: Card } | { error: GithubError }> => {
+    // Tokenless demo: serve the baked sample cards by login (mirrors the API
+    // route) so the home-fan samples resolve without a GitHub token configured.
+    if (!process.env.GITHUB_TOKEN) {
+      const sample = SAMPLE_CARDS.find((c) => c.login.toLowerCase() === username.toLowerCase());
+      if (sample) return { card: sample };
+    }
     try {
       return { card: buildCard(signalsFromPayload(await fetchProfile(username))) };
     } catch (e) {

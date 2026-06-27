@@ -32,7 +32,7 @@ const hash = (s: string): number => {
 // what the sharer saw (the page re-applies it; an absent/invalid code just
 // falls back to the GitHub-derived default).
 export function cardUrl(card: Card): string {
-  const base = `${SITE}/u/${card.login}`;
+  const base = `${SITE}/${card.login}`;
   return card.country ? `${base}?country=${encodeURIComponent(card.country)}` : base;
 }
 

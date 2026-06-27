@@ -19,9 +19,9 @@ interface Props {
   onCountryChange: (code: string) => void;
 }
 
-// Card width tracks viewport height so the whole report fits one screen; it falls
-// back to a fixed range on the stacked mobile layout.
-const CARD_WIDTH = "clamp(206px, 40vh, 322px)";
+// Card width scales with the viewport but is bounded by BOTH width and height
+// (and a hard min/max) so it never overflows a narrow phone or a short laptop.
+const CARD_WIDTH = "clamp(220px, min(80vw, 40vh), 332px)";
 
 // Confetti palette per tier — gold for prestige, green always woven in (brand).
 const CONFETTI: Record<string, string[]> = {
@@ -45,7 +45,7 @@ export default function ResultView({ card, onBack, onCountryChange }: Props) {
   const ignited = phase === "ignite" || phase === "burst" || phase === "freeze";
 
   return (
-    <main className="relative z-[2] mx-auto flex h-[100dvh] w-full max-w-[1280px] flex-col overflow-hidden px-[22px] max-[980px]:h-auto max-[980px]:min-h-[100dvh] max-[980px]:overflow-visible max-[980px]:pb-12">
+    <main className="relative z-[2] mx-auto flex min-h-[100dvh] w-full max-w-[1280px] flex-col px-[clamp(16px,4vw,22px)] pb-[clamp(28px,5vh,52px)]">
       {/* Tier-reactive backdrop: dims the global green wash and lets the card's
           own tier color own the result screen (green is the action, the card is
           the prize — they shouldn't fight here). Fades in with the reveal. */}
@@ -75,16 +75,16 @@ export default function ResultView({ card, onBack, onCountryChange }: Props) {
         <ReportHeader card={card} />
       </div>
 
-      <div className="mt-[clamp(10px,2vh,22px)] grid min-h-0 flex-1 grid-cols-[1fr_auto_1fr] items-stretch gap-[clamp(14px,2.4vw,40px)] max-[980px]:mt-6 max-[980px]:flex max-[980px]:flex-col max-[980px]:items-center">
+      <div className="mt-[clamp(14px,2.4vh,26px)] grid grid-cols-[1fr_auto_1fr] items-start gap-[clamp(16px,2.4vw,40px)] max-[980px]:mt-6 max-[980px]:flex max-[980px]:flex-col max-[980px]:items-center">
         {/* left — attributes + playstyles */}
-        <div className="flex h-full min-h-0 justify-end overflow-y-auto max-[980px]:order-2 max-[980px]:h-auto max-[980px]:w-full max-[980px]:max-w-[420px] max-[980px]:justify-center">
+        <div className="flex justify-end max-[980px]:order-2 max-[980px]:w-full max-[980px]:max-w-[420px] max-[980px]:justify-center">
           <div className="w-full max-w-[360px]">
             <AttributesPanel card={card} />
           </div>
         </div>
 
         {/* center — the card + actions (the walkout happens here) */}
-        <div className="relative flex h-full flex-col items-center gap-[12px] max-[980px]:order-1 max-[980px]:h-auto">
+        <div className="relative flex flex-col items-center gap-[clamp(12px,2vh,18px)] max-[980px]:order-1">
           {/* spotlight wash — a soft, diffuse glow from above as the card rises.
               Reduced + blurred so it reads as ambient light, not a hard beam. */}
           <div
@@ -121,7 +121,7 @@ export default function ResultView({ card, onBack, onCountryChange }: Props) {
         </div>
 
         {/* right — scouting metrics */}
-        <div className="flex h-full min-h-0 overflow-y-auto max-[980px]:order-3 max-[980px]:h-auto max-[980px]:w-full max-[980px]:max-w-[420px] max-[980px]:justify-center">
+        <div className="flex max-[980px]:order-3 max-[980px]:w-full max-[980px]:max-w-[420px] max-[980px]:justify-center">
           <div className="w-full max-w-[360px]">
             <MetricsPanel card={card} />
           </div>
