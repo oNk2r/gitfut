@@ -29,7 +29,7 @@ export default function AppShell() {
 
   return (
     <>
-      <main className="relative z-[2] flex h-screen min-h-[520px] flex-col overflow-hidden max-[860px]:h-auto max-[860px]:min-h-screen max-[860px]:overflow-visible">
+      <main className="relative z-[2] flex min-h-screen flex-col">
         <div className="mx-auto flex w-full max-w-[1180px] flex-1 items-center gap-[clamp(24px,5vw,72px)] px-[clamp(22px,5vw,56px)] max-[860px]:flex-col max-[860px]:gap-[34px] max-[860px]:pb-6 max-[860px]:pt-[clamp(26px,5vh,40px)] max-[860px]:text-center">
           <ScoutForm
             loading={isPending}
