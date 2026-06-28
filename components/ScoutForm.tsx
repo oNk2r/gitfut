@@ -38,8 +38,12 @@ export default function ScoutForm({
           tournament (broadcast WORLD CUP 26), joined by the × the concept implies.
           No status-pill or pulsing dot — the type carries it. */}
       <div className="mb-[18px] inline-flex items-center gap-[9px] rounded-[8px] border border-white/[0.08] bg-white/[0.025] px-[12px] py-[6px] max-[860px]:mx-auto">
-        <span className="font-mono text-[10.5px] font-semibold tracking-[.18em] text-ink-soft">GITHUB</span>
-        <span className="font-display text-[15px] leading-none text-brand">×</span>
+        <span className="font-mono text-[10.5px] font-semibold tracking-[.18em] text-ink-soft">
+          GITHUB
+        </span>
+        <span className="font-display text-[15px] mt-[1px] leading-none text-brand">
+          ×
+        </span>
         <span className="font-display text-[15px] leading-none tracking-[.06em] text-ink">
           WORLD CUP <span className="text-gold-hi">26</span>
         </span>
@@ -118,14 +122,24 @@ export default function ScoutForm({
           social proof, so it leads in the display face with tabular figures. */}
       <div className="mt-[20px] flex flex-wrap items-center gap-x-[14px] gap-y-[10px] max-[860px]:justify-center">
         <span className="inline-flex items-baseline gap-[9px]">
-          <span className="relative flex h-[7px] w-[7px] translate-y-[-1px] self-center" aria-hidden>
+          <span
+            className="relative flex h-[7px] w-[7px] translate-y-[-1px] self-center"
+            aria-hidden
+          >
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-60" />
             <span className="relative inline-flex h-[7px] w-[7px] rounded-full bg-brand" />
           </span>
-          <span className="font-display text-[20px] leading-none tabular-nums text-ink">12,480</span>
-          <span className="text-[12px] text-ink-mute">cards rated this window</span>
+          <span className="font-display text-[20px] leading-none tabular-nums text-ink">
+            12,480
+          </span>
+          <span className="text-[12px] text-ink-mute">
+            cards rated this window
+          </span>
         </span>
-        <span aria-hidden className="h-[12px] w-px bg-white/[0.12] max-[860px]:hidden" />
+        <span
+          aria-hidden
+          className="h-[12px] w-px bg-white/[0.12] max-[860px]:hidden"
+        />
         <button
           type="button"
           onClick={onOpenModal}
