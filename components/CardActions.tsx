@@ -43,6 +43,7 @@ const EXPORTS: ExportAction[] = [
     done: "Saved",
     icon: Download,
     run: async (node, card) => {
+      await document.fonts.ready; // local FUT fonts must be loaded before capture
       const url = await toPng(node, RENDER_OPTS);
       const a = document.createElement("a");
       a.download = `${card.login}-gitfut.png`;
@@ -57,9 +58,19 @@ const EXPORTS: ExportAction[] = [
     done: "Copied",
     icon: Copy,
     run: async (node) => {
-      const blob = await toBlob(node, RENDER_OPTS);
-      if (!blob) throw new Error("render returned no image");
-      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      // Pass a Promise<Blob> so clipboard.write() fires synchronously within the
+      // click's user activation; awaiting the (slow, 3x) render first lets the
+      // activation lapse → NotAllowedError. The browser awaits the blob itself.
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "image/png": (async () => {
+            await document.fonts.ready;
+            const blob = await toBlob(node, RENDER_OPTS);
+            if (!blob) throw new Error("render returned no image");
+            return blob;
+          })(),
+        }),
+      ]);
     },
   },
 ];
@@ -116,8 +127,8 @@ export default function CardActions({
     setBusy(a.id);
     setError(null);
     try {
-      await document.fonts.ready; // local FUT fonts must be loaded before capture
-      await a.run(node, card);
+      await a.run(node, card); // each action awaits fonts.ready itself, so the
+      // clipboard copy can call write() synchronously within the user gesture.
       setDone(a.id);
       setTimeout(() => setDone((d) => (d === a.id ? null : d)), 1500);
     } catch (e) {
