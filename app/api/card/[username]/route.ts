@@ -31,7 +31,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ username
   }
   try {
     const card = buildCard(signalsFromPayload(await fetchProfile(username)));
-    void recordScout();
+    after(() => recordScout());
     return Response.json(await resolveCountry(card, override, req));
   } catch (e) {
     const err = e as GithubError;
