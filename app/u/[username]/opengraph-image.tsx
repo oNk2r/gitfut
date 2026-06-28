@@ -99,7 +99,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
               letterSpacing: 2,
             }}
           >
-            GITFUT · GITHUB × WORLD CUP 26
+            GITHUB × WORLD CUP 26
           </div>
 
           {card ? (
@@ -116,17 +116,17 @@ export default async function Image({ params }: { params: Promise<{ username: st
                 <div style={{ display: "flex", flexDirection: "column" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                     <div style={{ display: "flex", fontSize: 64, fontWeight: 800, lineHeight: 1 }}>{card.name}</div>
+                  </div>
+                  <div style={{ display: "flex", gap: 12, marginTop: 10, fontSize: 26, color: "#a8b3bd" }}>
                     {flag && (
                       <img
                         src={flag}
                         width={54}
                         height={38}
                         alt=""
-                        style={{ borderRadius: 6, border: "1px solid rgba(255,255,255,0.14)", objectFit: "cover" }}
+                        style={{ borderRadius: 6, border: "1px solid rgba(255,255,255,0.14)", objectFit: "cover"}}
                       />
                     )}
-                  </div>
-                  <div style={{ display: "flex", gap: 12, marginTop: 10, fontSize: 26, color: "#a8b3bd" }}>
                     <span style={{ color: accent, fontWeight: 800 }}>{card.overall} OVR</span>
                     <span>·</span>
                     <span>{card.position}</span>
