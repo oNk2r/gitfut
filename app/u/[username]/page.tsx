@@ -40,10 +40,12 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
     return {
       title: `${res.card.name} — ${res.card.overall} ${res.card.finishLabel} · GitFut`,
       description: `${res.card.name} scouted on GitFut: ${res.card.overall} OVR ${res.card.position}, ${res.card.archetype}.`,
+      alternates: { canonical: `/${res.card.login}` },
       twitter: { card: "summary_large_image" },
     };
   }
-  return { title: `@${username} · GitFut` };
+  // Not a real profile — keep these soft-404s out of the index.
+  return { title: `@${username} · GitFut`, robots: { index: false } };
 }
 
 function NotScouted({ username, error }: { username: string; error: GithubError }) {

@@ -30,20 +30,36 @@ const dinCond = localFont({ src: "./fonts/DINPro-Cond.otf", variable: "--font-di
 const dinBold = localFont({ src: "./fonts/DINPro-CondBold.otf", variable: "--font-din-bold", display: "swap" });
 const dinMedium = localFont({ src: "./fonts/DINPro-CondMedium.otf", variable: "--font-din-medium", display: "swap" });
 
+const TITLE = "GitFut — your GitHub, rated out of 99";
+const DESCRIPTION =
+  "Rate any GitHub profile out of 99 as a FIFA-Ultimate-Team-style player card, scored from real commits, stars and contributions. Get scouted and share your card.";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://gitfut.com"),
-  title: "GitFut — your GitHub, rated out of 99",
-  description: "Turn any GitHub profile into a World-Cup-style player card rated out of 99. Get scouted.",
+  title: TITLE,
+  description: DESCRIPTION,
+  keywords: [
+    "GitHub profile card",
+    "rate my GitHub",
+    "GitHub stats",
+    "developer trading card",
+    "FUT card",
+    "GitHub rating",
+    "World Cup",
+    "GitFut",
+  ],
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "GitFut — your GitHub, rated out of 99",
-    description: "Turn any GitHub profile into a World-Cup-style player card rated out of 99. Get scouted.",
+    title: TITLE,
+    description: DESCRIPTION,
     url: "https://gitfut.com",
     siteName: "GitFut",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "GitFut — your GitHub, rated out of 99",
-    description: "Turn any GitHub profile into a World-Cup-style player card rated out of 99.",
+    title: TITLE,
+    description: DESCRIPTION,
   },
 };
 

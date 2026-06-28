@@ -7,10 +7,35 @@ import { getScoutCount } from "@/lib/analytics";
 // own 1h cache regardless).
 export const dynamic = "force-dynamic";
 
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://gitfut.com/#website",
+      url: "https://gitfut.com",
+      name: "GitFut",
+      description: "Turn any GitHub profile into a player card rated out of 99.",
+    },
+    {
+      "@type": "WebApplication",
+      name: "GitFut",
+      url: "https://gitfut.com",
+      applicationCategory: "DeveloperApplication",
+      operatingSystem: "Web",
+      browserRequirements: "Requires JavaScript",
+      description:
+        "Turn any GitHub profile into a FIFA-Ultimate-Team-style player card rated out of 99, built from real GitHub stats.",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    },
+  ],
+};
+
 export default async function Home() {
   const [stars, scoutCount] = await Promise.all([getRepoStars(), getScoutCount()]);
   return (
     <div className="relative min-h-screen overflow-x-hidden text-ink">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
       <Background />
       <AppShell stars={stars} scoutCount={scoutCount} />
     </div>
