@@ -1,17 +1,14 @@
 import { type GithubError } from "@/lib/github/client";
 import { scoutCard } from "@/lib/scout";
-import { getViewerCountry } from "@/lib/ipgeo";
-import { needsIpFallback, pickFlag } from "@/lib/flagPriority";
+import { pickFlag } from "@/lib/flagPriority";
 import { recordScout } from "@/lib/analytics";
 import { after } from "next/server";
 import type { Card } from "@/lib/scoring/types";
 
-// Resolve the card's flag by priority (override → GitHub → viewer IP). The IP
-// lookup only runs when it can change the result, so the common GitHub-resolved
-// path stays network-free.
-async function resolveCountry(card: Card, override: string | null, req: Request): Promise<Card> {
-  const ip = needsIpFallback(override, card.country) ? await getViewerCountry(req) : null;
-  return { ...card, country: pickFlag(override, card.country, ip) ?? "" };
+// Resolve the card's flag by priority (override → GitHub). No IP/geo fallback —
+// an unknown country shows no flag rather than the viewer's own.
+function resolveCountry(card: Card, override: string | null): Card {
+  return { ...card, country: pickFlag(override, card.country) ?? "" };
 }
 
 export async function GET(req: Request, { params }: { params: Promise<{ username: string }> }) {
@@ -22,7 +19,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ username
   try {
     const card = await scoutCard(username);
     after(() => recordScout());
-    return Response.json(await resolveCountry(card, override, req));
+    return Response.json(resolveCountry(card, override));
   } catch (e) {
     const err = e as GithubError;
     const status =

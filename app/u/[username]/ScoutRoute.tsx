@@ -22,10 +22,15 @@ export default function ScoutRoute({
 }) {
   const router = useRouter();
   const [card, setCard] = useState(initial);
+  // Once the visitor manually picks a flag, cancel any pending share-image
+  // capture: the Blob must only ever hold the canonical (GitHub-derived) card,
+  // never this personal override.
+  const [overridden, setOverridden] = useState(false);
 
   const onCountryChange = (code: string) => {
     const next = { ...card, country: code };
     setCard(next);
+    setOverridden(true);
     writeCardCache(next);
     const url = new URL(window.location.href);
     if (code) url.searchParams.set("country", code);
@@ -40,7 +45,7 @@ export default function ScoutRoute({
       onBack={() => router.push("/")}
       onCountryChange={onCountryChange}
       shareSig={shareSig}
-      generateShare={generateShare}
+      generateShare={generateShare && !overridden}
     />
   );
 }

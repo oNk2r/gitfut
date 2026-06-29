@@ -62,7 +62,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
   // The OG/file-convention route only receives `params` (never the URL query),
   // so the unfurl shows the card's GitHub-derived flag. A manual override is a
   // personal/session tweak and isn't reflected in the social preview.
-  const flag = card ? await flagDataUri(pickFlag(null, card.country, null) ?? "") : null;
+  const flag = card ? await flagDataUri(pickFlag(null, card.country) ?? "") : null;
 
   return new ImageResponse(
     (

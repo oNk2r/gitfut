@@ -1,13 +1,11 @@
 import { cache } from "react";
-import { headers } from "next/headers";
 import { after } from "next/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Background from "@/components/Background";
 import { type GithubError } from "@/lib/github/client";
 import { scoutCard } from "@/lib/scout";
-import { countryFromHeaders } from "@/lib/ipgeo";
-import { needsIpFallback, pickFlag } from "@/lib/flagPriority";
+import { pickFlag } from "@/lib/flagPriority";
 import { recordScout } from "@/lib/analytics";
 import type { Card } from "@/lib/scoring/types";
 import ScoutRoute from "./ScoutRoute";
@@ -78,19 +76,23 @@ export default async function Page({
   const { username } = await params;
   const { country: override } = await searchParams;
   const res = await loadCard(username);
-  // Flag priority, mirroring the API route: a shared-link override wins, then the
-  // GitHub-derived country, then the visitor's edge geo header. (No ipapi fallback
-  // here — a per-visit lookup on every shared card isn't worth it; the edge header
-  // covers production visitors.)
+  // Flag priority: a shared-link ?country= override wins, else the GitHub-derived
+  // country. No IP/geo fallback — we never put the *viewer's* country on someone
+  // else's card.
   let card: Card | null = "card" in res ? res.card : null;
   let generateShare = false;
   let shareSig = "";
   if (card) {
     after(() => recordScout()); // analytics, flushed after the response (serverless-safe)
-    const ip = needsIpFallback(override, card.country) ? countryFromHeaders(await headers()) : null;
-    card = { ...card, country: pickFlag(override, card.country, ip) ?? "" };
+    const canonicalCountry = pickFlag(null, card.country) ?? ""; // GitHub-derived only
+    const displayCountry = pickFlag(override, card.country) ?? "";
+    card = { ...card, country: displayCountry };
     const img = await getCardImage(card.login);
-    generateShare = !img || img.stale; // (re)generate the share image if missing/stale
+    // Only ever cache the canonical card in Blob — never a per-visitor flag
+    // override — so the shared/embedded image is identical for everyone. The
+    // override stays a live, personal tweak; picker-time overrides are cancelled
+    // client-side in ScoutRoute so they can't taint the capture either.
+    generateShare = (!img || img.stale) && displayCountry === canonicalCountry;
     shareSig = signLogin(card.login);
   }
   return (
