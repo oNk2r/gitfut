@@ -50,6 +50,11 @@ const ENDPOINT = "https://api.github.com/graphql";
 const VALID = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
 const GITHUB_EPOCH_YEAR = 2008; // GitHub launched Feb 2008; no account predates it.
 const LIFETIME_BATCH = 4; // contribution windows per request — stays well under GitHub's timeout.
+// Abort a GitHub request that hangs at the socket level. Set above GitHub's own
+// ~10s resolver timeout (past which it returns an error itself) so a slow-but-live
+// query still completes — only a truly stuck connection is cut, instead of hanging
+// the whole scout (and, under load, starving other requests) indefinitely.
+const REQUEST_TIMEOUT_MS = 12_000;
 
 const fail = (type: GithubErrorType, message: string): never => {
   throw { type, message } satisfies GithubError;
@@ -97,18 +102,24 @@ interface YearContrib {
 async function gql<T>(query: string, login: string, token: string, retries = 1): Promise<{ user: T | null }> {
   for (let attempt = 0; attempt <= retries; attempt++) {
     let res: Response;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS);
     try {
       res = await fetch(ENDPOINT, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ query, variables: { login } }),
+        signal: ctrl.signal,
       });
     } catch {
+      // Includes the AbortError from a timeout — retried like any transient network failure.
       if (attempt < retries) {
         await delay();
         continue;
       }
       return fail("network", "Couldn't reach GitHub — check your connection.");
+    } finally {
+      clearTimeout(timer);
     }
 
     if (res.status === 401) return fail("config", "GitHub token is invalid or expired.");

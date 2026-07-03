@@ -48,6 +48,24 @@ async function writeCache(login: string, card: Card): Promise<void> {
   }
 }
 
+// Single-flight: concurrent scouts of the same login collapse onto one in-flight
+// build. The Redis cache takes a beat to populate (a profile fetch is a handful
+// of GitHub calls), so when a profile trends every hit in that fill window would
+// otherwise be a full cache miss — one GitHub fetch *per concurrent viewer*. This
+// map coalesces them into a single fetch whose result they all share.
+//
+// Keyed by normalized login. Entries are deleted the moment the build settles
+// (success or failure) so failures are never memoised — the next scout retries —
+// and the map can't grow unbounded. Callers never mutate the returned Card (every
+// surface spreads it: `{ ...card, country }`), so sharing one object is safe.
+const inflight = new Map<string, Promise<Card>>();
+
+async function buildFresh(username: string, login: string): Promise<Card> {
+  const card = buildCard(signalsFromPayload(await fetchProfile(username)));
+  await writeCache(login, card);
+  return card;
+}
+
 // Username -> Card, Redis-cached. Throws the same GithubError as fetchProfile
 // when the scout fails, so callers keep mapping it to a 404 page / error status /
 // null OG exactly as before.
@@ -65,7 +83,11 @@ export async function scoutCard(username: string): Promise<Card> {
   const cached = await readCache(login);
   if (cached) return cached;
 
-  const card = buildCard(signalsFromPayload(await fetchProfile(username)));
-  await writeCache(login, card);
-  return card;
+  // Coalesce concurrent misses for this login onto one build (see `inflight`).
+  const existing = inflight.get(login);
+  if (existing) return existing;
+
+  const pending = buildFresh(username, login).finally(() => inflight.delete(login));
+  inflight.set(login, pending);
+  return pending;
 }
