@@ -74,8 +74,9 @@ export async function scoutCard(username: string): Promise<Card> {
 
   // Tokenless demo: serve the in-memory sample cards by login so the home-fan
   // samples resolve (and the app stays explorable) without a GitHub token. They
-  // already live in memory, so they bypass Redis entirely.
-  if (!process.env.GITHUB_TOKEN) {
+  // already live in memory, so they bypass Redis entirely. Checks both env vars
+  // so a pool-only deploy (GITHUB_TOKENS without GITHUB_TOKEN) scouts for real.
+  if (!process.env.GITHUB_TOKEN && !process.env.GITHUB_TOKENS) {
     const sample = SAMPLE_CARDS.find((c) => c.login.toLowerCase() === login);
     if (sample) return sample;
   }
