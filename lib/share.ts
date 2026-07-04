@@ -5,7 +5,7 @@ import type { Card } from "@/lib/scoring/types";
 
 export type SharePlatform = "x" | "linkedin" | "whatsapp";
 
-const SITE = "https://ytfut.com";
+const SITE = "https://ytfut.vercel.app";
 
 const lines = (c: Card): string[] => [
   `apparently i'm a ${c.overall}-rated ${c.position}. my videos do numbers, my cardio does not.`,

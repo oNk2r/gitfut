@@ -262,7 +262,7 @@
   }
 }
 
-/* Card signature (ytfut.com + @handle) — hidden on the live card, painted only
+/* Card signature (ytfut.vercel.app + @handle) — hidden on the live card, painted only
    into exported images. CardActions / CardImageSync capture an off-screen clone
    tagged `.ytfut-capturing`, which reveals it. See lib/capture.ts. */
 .ytfut-signature {

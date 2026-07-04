@@ -368,6 +368,41 @@ export function MetricsPanel({ card }: { card: Card }) {
           <MetricBar key={m.label} metric={m} accent={accent} index={i} />
         ))}
       </div>
+
+      <div className="mt-5 border-t border-white/[0.06] pt-4">
+        <div className="mb-2.5 flex items-center gap-[6px]">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: accent }} />
+          <h4 className="font-display text-[11px] font-bold tracking-[0.15em] text-ink-faint uppercase">
+            Card Stat Guide
+          </h4>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3.5 text-[13.5px] leading-snug text-ink-dim">
+          <div className="flex flex-col">
+            <span className="font-display font-bold tracking-wide" style={{ color: accent }}>PAC (Pace)</span>
+            <span className="text-[11.5px] text-ink-mute mt-0.5">Upload frequency &amp; schedule</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-display font-bold tracking-wide" style={{ color: accent }}>DRI (Dribbling)</span>
+            <span className="text-[11.5px] text-ink-mute mt-0.5">Genre diversity (categories)</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-display font-bold tracking-wide" style={{ color: accent }}>SHO (Shooting)</span>
+            <span className="text-[11.5px] text-ink-mute mt-0.5">Recent views &amp; virality</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-display font-bold tracking-wide" style={{ color: accent }}>DEF (Defending)</span>
+            <span className="text-[11.5px] text-ink-mute mt-0.5">Like-to-view alignment</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-display font-bold tracking-wide" style={{ color: accent }}>PAS (Passing)</span>
+            <span className="text-[11.5px] text-ink-mute mt-0.5">Likes &amp; comments interaction</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-display font-bold tracking-wide" style={{ color: accent }}>PHY (Physical)</span>
+            <span className="text-[11.5px] text-ink-mute mt-0.5">Channel age &amp; total views</span>
+          </div>
+        </div>
+      </div>
     </Section>
   );
 }

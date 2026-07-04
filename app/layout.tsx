@@ -29,7 +29,7 @@ const DESCRIPTION =
   "Rate any YouTube channel out of 99 as a FIFA-Ultimate-Team-style player card, scored from subscribers, views, uploads and engagement. Get rated and share your card.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ytfut.com"),
+  metadataBase: new URL("https://ytfut.vercel.app"),
   title: TITLE,
   description: DESCRIPTION,
   keywords: [
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: "https://ytfut.com",
+    url: "https://ytfut.vercel.app",
     siteName: "YTFut",
     type: "website",
   },

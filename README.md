@@ -10,8 +10,8 @@
 
 <br/><br/>
 
-<a href="https://ytfut.com/u/@mrbeast"><img src="https://ytfut.com/api/card-image/@mrbeast" width="240" alt="YTFut card"></a>
-<a href="https://ytfut.com/u/@mkbhd"><img src="https://ytfut.com/api/card-image/@mkbhd" width="240" alt="YTFut card"></a>
+<a href="https://ytfut.vercel.app/u/@mrbeast"><img src="https://ytfut.vercel.app/api/card-image/@mrbeast" width="240" alt="YTFut card"></a>
+<a href="https://ytfut.vercel.app/u/@mkbhd"><img src="https://ytfut.vercel.app/api/card-image/@mkbhd" width="240" alt="YTFut card"></a>
 
 <br/><br/>
 
@@ -24,13 +24,13 @@
 Your card lives at a URL. Drop it in your markdown, website, portfolio, anywhere — and it **re-rates itself** as your stats change.
 
 ```md
-[![My YTFut card](https://ytfut.com/api/card-image/YOUR_USERNAME)](https://ytfut.com/u/YOUR_USERNAME)
+[![My YTFut card](https://ytfut.vercel.app/api/card-image/YOUR_USERNAME)](https://ytfut.vercel.app/u/YOUR_USERNAME)
 ```
 
 | | |
 |---|---|
-| **`ytfut.com/api/card-image/<username>`** | your card, as a live image |
-| **`ytfut.com/u/<username>`** | the full rating report |
+| **`ytfut.vercel.app/api/card-image/<username>`** | your card, as a live image |
+| **`ytfut.vercel.app/u/<username>`** | the full rating report |
 | **`?country=XX`** | override the flag (e.g. `?country=DZ`) |
 
 <br/>
@@ -69,7 +69,7 @@ Every card walks out in a finish:
 
 **Built with** Next.js · TypeScript · Tailwind · Redis
 
-**[ytfut.com](https://ytfut.com)** &nbsp;·&nbsp; rate someone today
+**[ytfut.vercel.app](https://ytfut.vercel.app)** &nbsp;·&nbsp; rate someone today
 
 <img src="https://capsule-render.vercel.app/api?type=waving&height=90&color=0:39d353,100:006d32&section=footer" alt="" width="100%">
 

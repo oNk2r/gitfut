@@ -45,7 +45,7 @@ export default async function Image() {
               Turn any YouTube channel into a World-Cup-style player card, rated out of 99.
             </div>
           </div>
-          <div style={{ display: "flex", fontSize: 28, color: "#888888" }}>ytfut.com</div>
+          <div style={{ display: "flex", fontSize: 28, color: "#888888" }}>ytfut.vercel.app</div>
         </div>
 
         <div style={{ display: "flex" }}>{cardTree(card, assets, CARD_W)}</div>

@@ -184,7 +184,7 @@ const StoryFrame = forwardRef<HTMLDivElement, { card: Card }>(function StoryFram
             whiteSpace: "nowrap",
           }}
         >
-          TRY YOUR CARD ON YTFUT.COM
+          TRY YOUR CARD ON YTFUT.VERCEL.APP
           <span style={{ fontSize: 48 }}>→</span>
         </div>
       </div>

@@ -63,7 +63,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
           <div style={{ display: "flex", color: "#ff0000", fontSize: 26, fontWeight: 700, letterSpacing: 4 }}>YOUTUBE × WORLD CUP 26</div>
           <div style={{ display: "flex", fontSize: 84, fontWeight: 700, marginTop: 20 }}>{username}</div>
           <div style={{ display: "flex", fontSize: 34, color: "#aaaaaa", marginTop: 18 }}>Get your YouTube rated out of 99.</div>
-          <div style={{ display: "flex", fontSize: 30, color: "#ff0000", fontWeight: 700, marginTop: 26 }}>ytfut.com</div>
+          <div style={{ display: "flex", fontSize: 30, color: "#ff0000", fontWeight: 700, marginTop: 26 }}>ytfut.vercel.app</div>
         </div>
       ),
       { ...size, fonts, headers: CACHE },
@@ -105,7 +105,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
           <div style={{ display: "flex", fontSize: 30, color: "#aaaaaa", marginTop: 22, lineHeight: 1.3, maxWidth: 600 }}>
             {deEmDash(card.archetypeBlurb)}.
           </div>
-          <div style={{ display: "flex", fontSize: 26, color: "#888888", marginTop: 32 }}>ytfut.com/{card.login}</div>
+          <div style={{ display: "flex", fontSize: 26, color: "#888888", marginTop: 32 }}>ytfut.vercel.app/{card.login}</div>
         </div>
       </div>
     ),

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SAMPLE_LOGINS } from "@/lib/youtube/samples";
 
-const BASE = "https://ytfut.com";
+const BASE = "https://ytfut.vercel.app";
 
 // Home + the showcase profiles (real, indexable example cards).
 export default function sitemap(): MetadataRoute.Sitemap {

@@ -33,11 +33,11 @@ const card = (over: Partial<Card> = {}): Card =>
 
 describe("share service", () => {
   it("builds the canonical card URL from the login, encoding the displayed flag", () => {
-    expect(cardUrl(card())).toBe("https://ytfut.com/%40mrbeast?country=us");
+    expect(cardUrl(card())).toBe("https://ytfut.vercel.app/%40mrbeast?country=us");
   });
 
   it("omits the country param when the card has no flag", () => {
-    expect(cardUrl(card({ country: "" }))).toBe("https://ytfut.com/%40mrbeast");
+    expect(cardUrl(card({ country: "" }))).toBe("https://ytfut.vercel.app/%40mrbeast");
   });
 
   it("X intent uses /intent/tweet (NOT /intent/post) and carries url + hashtag", () => {
@@ -45,19 +45,19 @@ describe("share service", () => {
     expect(u).toContain("https://twitter.com/intent/tweet?");
     expect(u).not.toContain("/intent/post");
     expect(u).toContain("hashtags=YTFut");
-    expect(u).toContain(encodeURIComponent("https://ytfut.com/%40mrbeast?country=us"));
+    expect(u).toContain(encodeURIComponent("https://ytfut.vercel.app/%40mrbeast?country=us"));
   });
 
   it("LinkedIn intent uses share-offsite with only the url (preview from OG)", () => {
     const u = intentUrl("linkedin", card());
     expect(u).toContain("linkedin.com/sharing/share-offsite/?url=");
-    expect(u).toContain(encodeURIComponent("https://ytfut.com/%40mrbeast?country=us"));
+    expect(u).toContain(encodeURIComponent("https://ytfut.vercel.app/%40mrbeast?country=us"));
   });
 
   it("WhatsApp intent puts text + url in the message", () => {
     const u = intentUrl("whatsapp", card());
     expect(u).toContain("api.whatsapp.com/send?text=");
-    expect(decodeURIComponent(u)).toContain("ytfut.com/%40mrbeast?country=us");
+    expect(decodeURIComponent(u)).toContain("ytfut.vercel.app/%40mrbeast?country=us");
   });
 
   it("share text is deterministic per login and mentions the rating", () => {
@@ -77,7 +77,7 @@ describe("share service", () => {
   it("native payload carries title, brag-led text, and url", () => {
     const p = nativeSharePayload(card());
     expect(p.title).toBe("YTFut");
-    expect(p.url).toBe("https://ytfut.com/%40mrbeast?country=us");
+    expect(p.url).toBe("https://ytfut.vercel.app/%40mrbeast?country=us");
     expect(p.text).toBe(shareMessage(card()));
     expect(p.text).toContain("get rated");
   });

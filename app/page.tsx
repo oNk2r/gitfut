@@ -10,15 +10,15 @@ const JSON_LD = {
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://ytfut.com/#website",
-      url: "https://ytfut.com",
+      "@id": "https://ytfut.vercel.app/#website",
+      url: "https://ytfut.vercel.app",
       name: "YTFut",
       description: "Turn any YouTube channel into a player card rated out of 99.",
     },
     {
       "@type": "WebApplication",
       name: "YTFut",
-      url: "https://ytfut.com",
+      url: "https://ytfut.vercel.app",
       applicationCategory: "EntertainmentApplication",
       operatingSystem: "Web",
       browserRequirements: "Requires JavaScript",

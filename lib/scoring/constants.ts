@@ -15,9 +15,9 @@ export const K = {
     ] as [StatKey, StatKey][],
   },
   spike: { base: 8, cohesion: 0.6 },
-  legacy: { a: 1.0, b: 0.7, c: 0.3, d: 0.3, e: 0.3, f: 6.0, activeCap: 15, bonusMax: 11 },
+  legacy: { a: 1.0, b: 0.7, c: 0.3, d: 0.3, e: 0.3, f: 7.5, activeCap: 15, bonusMax: 11 },
   ovrCap: 88,
-  finish: { iconMin: 90, totyMin: 85, totyLegacy: 0.5, goldMin: 75, silverMin: 65 },
+  finish: { iconMin: 90, totyMin: 85, totyLegacy: 0.85, goldMin: 75, goldLegacy: 0.5, silverMin: 65, silverLegacy: 0.2 },
   iconAllowlist: ["@pewdiepie", "@mrbeast", "@mkbhd"],
 };
 
@@ -35,39 +35,4 @@ export const FINISH_LABELS: Record<Finish, string> = {
   toty: "TOTY",
   icon: "ICON",
   founder: "FOUNDER",
-};
-
-// The people who built ytfut. Keyed by LOWERCASE YouTube handle (including @).
-export const FOUNDERS: Record<string, FounderMeta> = {
-  younesfdj: {
-    art: "/cards/founder-red.png",
-    accent: "#ff2f45",
-    label: "FOUNDER",
-    tagline: "Co-founder of ytfut",
-  },
-  mawsis: {
-    art: "/cards/founder-chrome.png",
-    accent: "#d8dde3",
-    label: "FOUNDER",
-    tagline: "Co-founder of ytfut",
-  },
-  "@younesfdj": {
-    art: "/cards/founder-red.png",
-    accent: "#ff2f45",
-    label: "FOUNDER",
-    tagline: "Co-founder of ytfut",
-  },
-  "@mawsis": {
-    art: "/cards/founder-chrome.png",
-    accent: "#d8dde3",
-    label: "FOUNDER",
-    tagline: "Co-founder of ytfut",
-  },
-};
-
-export const FOUNDER_OVERALL: Record<string, number> = {
-  younesfdj: 93,
-  mawsis: 91,
-  "@younesfdj": 93,
-  "@mawsis": 91,
 };

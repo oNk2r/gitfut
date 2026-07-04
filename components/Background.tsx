@@ -2,6 +2,47 @@ const noiseSvg =
   '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2"/></filter><rect width="120" height="120" filter="url(#n)"/></svg>';
 const NOISE = `url("data:image/svg+xml;utf8,${encodeURIComponent(noiseSvg)}")`;
 
+// YouTube, Subscribe (bell), and Superchat icons for the grid cells
+function GridCell({ type, fill, lit }: { type: number; fill: string; lit: boolean }) {
+  if (type === 0) {
+    // YouTube Play Logo
+    return (
+      <path
+        d="M10.5 2.5h-9C.7 2.5 0 3.2 0 4v4c0 .8.7 1.5 1.5 1.5h9c.8 0 1.5-.7 1.5-1.5V4c0-.8-.7-1.5-1.5-1.5z M4.5 8.2V3.8l3.5 2.2-3.5 2.2z"
+        fill={fill}
+      />
+    );
+  } else if (type === 1) {
+    // Subscribe Bell
+    return (
+      <path
+        d="M6 1.5c-1.2 0-2.2.9-2.2 2.1v2.2L2.5 7.5h7L8.2 5.8V3.6c0-1.2-1-2.1-2.2-2.1zm-1.2 7h2.4c0 .7-.5 1.2-1.2 1.2s-1.2-.5-1.2-1.2z"
+        fill={fill}
+      />
+    );
+  } else {
+    // Superchat Dollar Circle
+    return (
+      <g>
+        <circle cx="6" cy="6" r="5.5" fill={fill} />
+        <text
+          x="6"
+          y="9.2"
+          fontSize="9"
+          fontWeight="900"
+          fontFamily="system-ui, sans-serif"
+          textAnchor="middle"
+          fill={lit ? "#1f1414" : "#ff0000"}
+          opacity={lit ? 0.95 : 0.15}
+          style={{ userSelect: "none" }}
+        >
+          $
+        </text>
+      </g>
+    );
+  }
+}
+
 // Rethemed grid motif: red YouTube-style upload activity grid.
 function ContribGrid() {
   const cols = 30;
@@ -11,18 +52,17 @@ function ContribGrid() {
     for (let c = 0; c < cols; c++) {
       const seed = (r * 7 + c * 13) % 11;
       const lit = seed < 3;
+      const type = (r * 3 + c * 7) % 3; // cycle between play, bell, superchat
+      const fill = lit ? "#ff0000" : "#1f1414";
       cells.push(
-        <rect
+        <g
           key={`${r}-${c}`}
-          x={c * 16}
-          y={r * 16}
-          width={12}
-          height={12}
-          rx={2.5}
-          fill={lit ? "#ff0000" : "#1f1414"}
+          transform={`translate(${c * 16}, ${r * 16}) scale(1.25)`}
           className={lit ? "gf-grid-cell" : undefined}
           style={lit ? { ["--gf-dur" as string]: `${2.4 + seed * 0.4}s` } : undefined}
-        />,
+        >
+          <GridCell type={type} fill={fill} lit={lit} />
+        </g>,
       );
     }
   }

@@ -1,7 +1,7 @@
 import { countryForLogin } from "../geo";
 import { topCategoryLogo } from "../youtube/categories";
 import { deriveMetrics, deriveSkillMoves, deriveStyle, deriveWeakFoot, deriveWorkRate } from "./attributes";
-import { ATTACK_STATS, FINISH_LABELS, FOUNDER_OVERALL, FOUNDERS, K, STATS, WEIGHTS } from "./constants";
+import { ATTACK_STATS, FINISH_LABELS, K, STATS, WEIGHTS } from "./constants";
 import { derivePlaystyles } from "./playstyles";
 import type {
   Archetype,
@@ -41,10 +41,10 @@ function center(s: Signals): number {
   const { w1, w2, w3, w4, b, lo, hi } = K.magnitude;
   const M = sigmoid(
     w1 * Lg(s.total_views) +
-      w2 * Lg(s.subscribers) +
-      w3 * Lg(s.avg_views_recent) +
-      w4 * s.channel_age_years +
-      b,
+    w2 * Lg(s.subscribers) +
+    w3 * Lg(s.avg_views_recent) +
+    w4 * s.channel_age_years +
+    b,
   );
   return lerp(lo, hi, M);
 }
@@ -131,11 +131,11 @@ function legacyScore(s: Signals): number {
 }
 
 function pickFinish(overall: number, L: number, recentSpike: boolean, login: string): Finish {
-  if (K.iconAllowlist.includes(login.toLowerCase()) || overall >= K.finish.iconMin) return "icon";
+  if (K.iconAllowlist.includes(login.toLowerCase())) return "icon";
   if (overall >= K.finish.totyMin && L >= K.finish.totyLegacy) return "toty";
   if (recentSpike && overall >= K.finish.silverMin) return "totw";
-  if (overall >= K.finish.goldMin) return "gold";
-  if (overall >= K.finish.silverMin) return "silver";
+  if (overall >= K.finish.goldMin && L >= K.finish.goldLegacy) return "gold";
+  if (overall >= K.finish.silverMin && L >= K.finish.silverLegacy) return "silver";
   return "bronze";
 }
 
@@ -164,6 +164,38 @@ function archetypeFromShape(st: Stats, finish: Finish): Archetype {
   return { name: "Mezzala", blurb: "relentless upload engine — consistent frequent shipping" };
 }
 
+function clampOVRByRequirements(overall: number, s: Signals, L: number): number {
+  let maxOVR = 89;
+
+  const age = s.channel_age_years;
+  const subs = s.subscribers;
+
+  // 96-99: Reserved for generational creators with exceptional longevity, scale, and impact
+  const isGenerational = age >= 10 && subs >= 15_000_000 && L >= 0.95;
+  // 93-95: Industry-leading creator with long-term influence
+  const isIndustryLeading = age >= 6 && subs >= 5_000_000 && L >= 0.88;
+  // 92: >=4 years old, elite consistency
+  const isEliteConsistency = age >= 4 && L >= 0.78;
+  // 91: >=3 years old, >=1M subs, sustained growth
+  const isSustainedGrowth = age >= 3 && subs >= 1_000_000 && L >= 0.60;
+  // 90: >=2 years old, >=500k subs, strong engagement
+  const isStrongEngagement = age >= 2 && subs >= 500_000 && L >= 0.45;
+
+  if (isGenerational) {
+    maxOVR = 99;
+  } else if (isIndustryLeading) {
+    maxOVR = 95;
+  } else if (isEliteConsistency) {
+    maxOVR = 92;
+  } else if (isSustainedGrowth) {
+    maxOVR = 91;
+  } else if (isStrongEngagement) {
+    maxOVR = 90;
+  }
+
+  return Math.min(overall, maxOVR);
+}
+
 export function buildCard(s: Signals): Card {
   const stats = spike(applyTension(zscore(rawStats(s))), center(s));
   const { position, family } = positionFromShape(stats);
@@ -171,14 +203,12 @@ export function buildCard(s: Signals): Card {
   const L = legacyScore(s);
 
   const loginLower = s.login.toLowerCase();
-  const founder = FOUNDERS[loginLower] || FOUNDERS[loginLower.replace(/^@/, "")];
-  const overall = founder
-    ? FOUNDER_OVERALL[loginLower] || FOUNDER_OVERALL[loginLower.replace(/^@/, "")]
-    : clamp(baseOVR + Math.round(K.legacy.bonusMax * L), 1, 99);
-  const finish: Finish = founder ? "founder" : pickFinish(overall, L, s.recent_spike, s.login);
-  const archetype = founder
-    ? { name: "Founder", blurb: "co-founder of YTFut — they built the very rating engine reading this card" }
-    : archetypeFromShape(stats, finish);
+  let overall = clamp(baseOVR + Math.round(K.legacy.bonusMax * L), 1, 99);
+
+  overall = clampOVRByRequirements(overall, s, L);
+
+  const finish: Finish = pickFinish(overall, L, s.recent_spike, s.login);
+  const archetype = archetypeFromShape(stats, finish);
   const skill = deriveSkillMoves(s);
   const weak = deriveWeakFoot(stats);
   const work = deriveWorkRate(stats);
@@ -202,7 +232,6 @@ export function buildCard(s: Signals): Card {
     archetypeBlurb: archetype.blurb,
     topCategory: s.topCategory ?? null,
     categoryLogo,
-    ...(founder ? { founder } : null),
     legacy: { L },
     report: {
       skillMoves: skill.value,

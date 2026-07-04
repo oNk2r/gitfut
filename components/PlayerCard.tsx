@@ -286,7 +286,7 @@ function PlayerCard({ card }: { card: Card }) {
             opacity: 0.62,
           }}
         >
-          YTFUT.COM
+          YTFUT.VERCEL.APP
         </div>
         <div
           style={{
