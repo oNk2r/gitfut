@@ -112,7 +112,7 @@ export default function ResultView({
           >
             how it works ↗
           </button>
-          <GithubStar stars={stars ?? null} />
+          {/* <GithubStar stars={stars ?? null} /> */}
         </div>
       </div>
 

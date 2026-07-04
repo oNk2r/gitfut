@@ -1,18 +1,18 @@
 // Loading-screen pun bank — football × git. Pure data + a deterministic
 // rotation helper so the loading screen stays lively without randomness.
 export const PUNS: readonly string[] = [
-  "Measuring your PRs (Penalty Resistance)…",
+  "Counting your subs (Super-Sub Impact)…",
   "Calculating your xG (eXpected Greatness)…",
-  "Checking VAR (Version & Review)…",
-  "Counting clean sheets (zero-bug commits)…",
-  "Reviewing the tape (your commit history)…",
-  "Assessing first touch (force-push reflexes)…",
-  "Timing your sprints (and your sprints)…",
-  "Rating your set pieces (merge conflicts)…",
-  "Weighing your transfer fee (star count)…",
-  "Inspecting your stamina (contribution streak)…",
-  "Reading your through-balls (pull requests)…",
-  "Grading your work rate (commits per night)…",
+  "Checking VAR (Video Assistant Rater)…",
+  "Counting clean sheets (zero-dislike uploads)…",
+  "Reviewing the tape (your upload history)…",
+  "Assessing first touch (thumbnail CTR)…",
+  "Timing your sprints (upload schedule)…",
+  "Rating your set pieces (collab videos)…",
+  "Weighing your transfer fee (channel value)…",
+  "Inspecting your stamina (upload streak)…",
+  "Reading your through-balls (reach & impressions)…",
+  "Grading your work rate (uploads per week)…",
 ];
 
 // Stable line for a given tick — callers advance `tick` on an interval.
