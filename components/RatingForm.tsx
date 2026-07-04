@@ -7,26 +7,26 @@ import Mascot from "./Mascot";
 interface Props {
   loading: boolean;
   error: string | null;
-  scoutCount: number | null;
-  onScout: (name: string) => void;
+  ratingCount: number | null;
+  onRate: (name: string) => void;
   onOpenModal: () => void;
 }
 
 const exampleClass =
   "cursor-pointer font-mono text-ink-soft underline decoration-brand/40 underline-offset-[3px] transition hover:text-brand";
 
-export default function ScoutForm({
+export default function RatingForm({
   loading,
   error,
-  scoutCount,
-  onScout,
+  ratingCount,
+  onRate,
   onOpenModal,
 }: Props) {
   const [name, setName] = useState("");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) onScout(name);
+    if (name.trim()) onRate(name);
   };
 
   return (
@@ -36,12 +36,9 @@ export default function ScoutForm({
         <Mascot size={150} />
       </div>
 
-      {/* crossover "fixture" tag — the dev world (mono GITHUB) versus the
-          tournament (broadcast WORLD CUP 26), joined by the × the concept implies.
-          No status-pill or pulsing dot — the type carries it. */}
       <div className="mb-[18px] inline-flex items-center gap-[9px] rounded-[8px] border border-white/[0.08] bg-white/[0.025] px-[12px] py-[6px] max-[860px]:mx-auto">
         <span className="font-mono text-[10.5px] font-semibold tracking-[.18em] text-ink-soft">
-          GITHUB
+          YOUTUBE
         </span>
         <span className="font-display text-[15px] mt-[1px] leading-none text-brand">
           ×
@@ -52,10 +49,10 @@ export default function ScoutForm({
       </div>
 
       <h1 className="font-display m-0 mb-3 text-[clamp(52px,7vw,104px)] leading-[.82] tracking-[.005em]">
-        GET SCOUTED<span className="text-brand">.</span>
+        GET RATED<span className="text-brand">.</span>
       </h1>
       <p className="mb-[26px] max-w-[420px] text-[clamp(15px,1.7vw,18px)] font-medium leading-[1.5] text-ink-dim max-[860px]:mx-auto">
-        Your GitHub stats, turned into a World-Cup-style player card rated out
+        Your YouTube stats, turned into a World-Cup-style player card rated out
         of 99.
       </p>
 
@@ -68,19 +65,19 @@ export default function ScoutForm({
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="github username"
+            placeholder="youtube handle or @creator"
             autoComplete="off"
             spellCheck={false}
-            aria-label="GitHub username"
-            className="font-mono h-14 w-full rounded-[14px] border-[1.5px] border-line bg-surface/70 pl-[34px] pr-5 text-[16px] font-medium text-white outline-none backdrop-blur-[4px] transition focus:border-brand focus:bg-surface focus:shadow-[0_0_0_4px_rgba(57,211,83,.16),0_0_42px_rgba(57,211,83,.24)]"
+            aria-label="YouTube creator handle"
+            className="font-mono h-14 w-full rounded-[14px] border-[1.5px] border-line bg-surface/70 pl-[34px] pr-5 text-[16px] font-medium text-white outline-none backdrop-blur-[4px] transition focus:border-brand focus:bg-surface focus:shadow-[0_0_0_4px_rgba(255,0,0,.16),0_0_42px_rgba(255,0,0,.24)]"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="font-display group flex h-14 items-center gap-2 rounded-[14px] bg-gradient-to-b from-brand to-brand-mid px-7 text-[20px] tracking-[.06em] text-[#04130a] shadow-[0_0_0_1px_rgba(57,211,83,.4),0_10px_30px_rgba(57,211,83,.3)] transition hover:from-brand-hi hover:to-brand disabled:cursor-wait disabled:opacity-75"
+          className="font-display group flex h-14 items-center gap-2 rounded-[14px] bg-gradient-to-b from-brand to-brand-mid px-7 text-[20px] tracking-[.06em] text-[#ffffff] shadow-[0_0_0_1px_rgba(255,0,0,.4),0_10px_30px_rgba(255,0,0,.3)] transition hover:from-brand-hi hover:to-brand disabled:cursor-wait disabled:opacity-75"
         >
-          {loading ? "SCOUTING…" : "SCOUT"}
+          {loading ? "RATING…" : "RATE"}
           {!loading && (
             <ArrowRight
               size={19}
@@ -104,26 +101,25 @@ export default function ScoutForm({
         try{" "}
         <button
           type="button"
-          onClick={() => onScout("torvalds")}
+          onClick={() => onRate("@mrbeast")}
           className={exampleClass}
         >
-          torvalds
+          @mrbeast
         </button>{" "}
         ·{" "}
         <button
           type="button"
-          onClick={() => onScout("sindresorhus")}
+          onClick={() => onRate("@mkbhd")}
           className={exampleClass}
         >
-          sindresorhus
+          @mkbhd
         </button>{" "}
         · or your own
       </div>
 
-      {/* live tally — a broadcast-style scoreboard count; the number is the
-          social proof, so it leads in the display face with tabular figures. */}
+      {/* live tally */}
       <div className="mt-[20px] flex flex-wrap items-center gap-x-[14px] gap-y-[10px] max-[860px]:justify-center">
-        {scoutCount != null && (
+        {ratingCount != null && (
           <>
             <span className="inline-flex items-baseline gap-[9px]">
               <span className="relative flex h-[7px] w-[7px] translate-y-[-1px] self-center" aria-hidden>
@@ -131,7 +127,7 @@ export default function ScoutForm({
                 <span className="relative inline-flex h-[7px] w-[7px] rounded-full bg-brand" />
               </span>
               <span className="font-display text-[20px] leading-none tabular-nums text-ink">
-                {scoutCount.toLocaleString("en-US")}
+                {ratingCount.toLocaleString("en-US")}
               </span>
               <span className="text-[12px] text-ink-mute">cards rated</span>
             </span>

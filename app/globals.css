@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ============================================================
-   GitFut Design System — WC26 luxury spine × GitHub green action
+   YTFut Design System — WC26 luxury spine × YouTube red action
    The keystone module: every screen reads from these tokens.
    ============================================================ */
 @theme {
@@ -10,25 +10,25 @@
   --font-mono: var(--font-jetbrains);
 
   /* WC26 spine — black / surfaces / gray / ink / gold */
-  --color-bg: #0d1117;
-  --color-bg-deep: #010409;
-  --color-panel: #161b22;
-  --color-surface: #161b22;
-  --color-surface-2: #21262d;
-  --color-line: #30363d;
-  --color-gray: #8b949e;
+  --color-bg: #0f0f0f;
+  --color-bg-deep: #050505;
+  --color-panel: #1f1f1f;
+  --color-surface: #1f1f1f;
+  --color-surface-2: #2d2d2d;
+  --color-line: #3d3d3d;
+  --color-gray: #aaaaaa;
 
-  --color-ink: #e6edf3;
-  --color-ink-dim: #c9d1d9;
-  --color-ink-soft: #a8b3bd;
-  --color-ink-faint: #8b949e;
-  --color-ink-mute: #6e7681;
+  --color-ink: #f1f1f1;
+  --color-ink-dim: #aaaaaa;
+  --color-ink-soft: #888888;
+  --color-ink-faint: #606060;
+  --color-ink-mute: #454545;
 
-  /* GitHub green — "the action" */
-  --color-brand: #39d353;
-  --color-brand-hi: #56e06b;
-  --color-brand-mid: #26a641;
-  --color-brand-deep: #006d32;
+  /* YouTube red — "the action" */
+  --color-brand: #ff0000;
+  --color-brand-hi: #ff4d4d;
+  --color-brand-mid: #cc0000;
+  --color-brand-deep: #990000;
 
   /* WC26 gold — prestige metal (reserved) */
   --color-gold: #d4af37;
@@ -64,7 +64,7 @@
   }
   ::selection {
     background: var(--color-brand);
-    color: #04130a;
+    color: #ffffff;
   }
   ::placeholder {
     color: var(--color-ink-mute);
@@ -184,7 +184,7 @@
   }
 }
 
-/* tier underline draws out from center under the scout-report name */
+/* tier underline draws out from center under the rating-report name */
 @keyframes gf-underline {
   0% {
     transform: scaleX(0);
@@ -196,7 +196,7 @@
   }
 }
 
-/* one-shot tier-accent shimmer sweep across the scout-report name on appear */
+/* one-shot tier-accent shimmer sweep across the rating-report name on appear */
 @keyframes gf-name-shimmer {
   0% {
     background-position: 130% 0;
@@ -262,13 +262,13 @@
   }
 }
 
-/* Card signature (gitfut.com + @handle) — hidden on the live card, painted only
+/* Card signature (ytfut.com + @handle) — hidden on the live card, painted only
    into exported images. CardActions / CardImageSync capture an off-screen clone
-   tagged `.gitfut-capturing`, which reveals it. See lib/capture.ts. */
-.gitfut-signature {
+   tagged `.ytfut-capturing`, which reveals it. See lib/capture.ts. */
+.ytfut-signature {
   display: none;
 }
-.gitfut-capturing .gitfut-signature {
+.ytfut-capturing .ytfut-signature {
   display: block;
 }
 

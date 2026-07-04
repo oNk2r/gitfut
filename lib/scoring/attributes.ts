@@ -2,29 +2,24 @@ import { formatCount } from "../format";
 import { STATS } from "./constants";
 import type { Metric, Signals, Stats, WorkRateLevel } from "./types";
 
-// FUT-style attributes derived purely from real GitHub signals — no estimation.
-// Each deriver returns its value plus a short, plain reason for the UI tooltip.
-
 const Lg = (x: number) => Math.log10(Math.max(0, x) + 1);
 const clamp = (x: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, x));
 
-// A real GitHub value mapped to 0–99, log-scaled against an "elite" reference.
 const score99 = (value: number, ref: number) =>
   value <= 0 ? 0 : clamp(Math.round(99 * (Lg(value) / Lg(ref))), 1, 99);
 
-// Skill moves (1–5) = technical range: language diversity, +1 for broad output.
+// Skill moves (1–5) = variety of content: category count, +1 for deep library of videos.
 export function deriveSkillMoves(s: Signals): { value: number; reason: string } {
-  let value = s.languages >= 10 ? 5 : s.languages >= 7 ? 4 : s.languages >= 4 ? 3 : s.languages >= 2 ? 2 : 1;
-  const bonus = s.public_repos >= 40 && value < 5;
+  let value = s.category_count >= 4 ? 5 : s.category_count >= 3 ? 4 : s.category_count >= 2 ? 3 : 2;
+  const bonus = s.video_count >= 200 && value < 5;
   if (bonus) value += 1;
-  const reason = `Technical range: ${s.languages} language${s.languages === 1 ? "" : "s"}${
-    bonus ? ` across ${formatCount(s.public_repos)} repos` : ""
+  const reason = `Category range: ${s.category_count} unique content genre${s.category_count === 1 ? "" : "s"}${
+    bonus ? ` across ${formatCount(s.video_count)} videos` : ""
   }.`;
   return { value, reason };
 }
 
-// Weak foot (1–5) = off-foot ability: how strong your WEAKER areas are (average
-// of the three lowest stats), so a one-trick profile rates low.
+// Weak foot (1–5) = off-foot ability: how balanced the creator's stats are.
 export function deriveWeakFoot(stats: Stats): { value: number; reason: string } {
   const sorted = STATS.map((k) => stats[k]).sort((a, b) => a - b);
   const weakSide = Math.round((sorted[0] + sorted[1] + sorted[2]) / 3);
@@ -34,28 +29,28 @@ export function deriveWeakFoot(stats: Stats): { value: number; reason: string } 
 
 const rate = (v: number): WorkRateLevel => (v >= 68 ? "High" : v >= 50 ? "Med" : "Low");
 
-// Work rate: attack = shipping output (PAC/SHO), defense = maintenance (DEF).
+// Work rate: attack = view-pull & upload speed (PAC/SHO), defense = user approval/likes (DEF).
 export function deriveWorkRate(stats: Stats): { attack: WorkRateLevel; defense: WorkRateLevel; reason: string } {
   const attack = rate(Math.round((stats.pac + stats.sho) / 2));
   const defense = rate(stats.def);
   return {
     attack,
     defense,
-    reason: `Attack ${attack} from shipping output (commits, stars); defense ${defense} from reviews & issues.`,
+    reason: `Attack ${attack} from view-pull & uploads; defense ${defense} from community like ratios.`,
   };
 }
 
 // Style: a one-word read of the recent activity pattern.
 export function deriveStyle(s: Signals): { value: string; reason: string } {
-  if (s.recent_spike) return { value: "Explosive", reason: "A recent burst well above your usual pace." };
-  if (s.active_days_recent >= 200 && s.recent_contributions >= 800)
-    return { value: "Relentless", reason: "Active on most days, all year round." };
-  if (s.account_age_years >= 6 && s.active_years >= 5)
-    return { value: "Controlled", reason: "A long, steady track record." };
-  if (s.max_repo_stars >= 5000 && s.recent_contributions < 200)
-    return { value: "Clinical", reason: "One big hit, quiet lately." };
-  if (s.recent_contributions >= 300) return { value: "Industrious", reason: "Steadily active this year." };
-  return { value: "Measured", reason: "Light recent activity." };
+  if (s.recent_spike) return { value: "Explosive", reason: "A recent viral view surge well above your usual baseline." };
+  if (s.recent_uploads >= 100)
+    return { value: "Relentless", reason: "Uploading constantly, maintaining a packed schedule." };
+  if (s.channel_age_years >= 6 && s.active_years >= 5)
+    return { value: "Controlled", reason: "A long, steady and seasoned track record." };
+  if (s.subscribers >= 10000000 && s.recent_uploads < 12)
+    return { value: "Clinical", reason: "Massive subscriber reach with highly selective uploads." };
+  if (s.recent_uploads >= 25) return { value: "Industrious", reason: "Regularly active with frequent content drops." };
+  return { value: "Measured", reason: "Calm and selective uploading schedule." };
 }
 
 interface MetricDef {
@@ -65,26 +60,20 @@ interface MetricDef {
   value: (s: Signals) => number;
 }
 
-// Core metrics — always shown (a few zeros are fine).
 const CORE_METRICS: MetricDef[] = [
-  { label: "Commits", unit: "commits", ref: 3_000, value: (s) => s.recent_commits },
-  { label: "Stars earned", unit: "stars", ref: 200_000, value: (s) => s.total_stars_owned },
-  { label: "Top repo reach", unit: "stars", ref: 150_000, value: (s) => s.max_repo_stars },
-  { label: "Pull requests", unit: "PRs", ref: 2_000, value: (s) => s.prs_to_others },
-  { label: "Followers", unit: "followers", ref: 100_000, value: (s) => s.followers },
-  { label: "Languages", unit: "languages", ref: 15, value: (s) => s.languages },
-  { label: "Issues", unit: "issues", ref: 1_500, value: (s) => s.issues_closed },
-  { label: "Code reviews", unit: "reviews", ref: 2_000, value: (s) => s.reviews },
-  { label: "Contributions", unit: "contributions", ref: 50_000, value: (s) => s.total_contributions_lifetime },
+  { label: "Subscribers", unit: "subs", ref: 100_000_000, value: (s) => s.subscribers },
+  { label: "Total Views", unit: "views", ref: 10_000_000_000, value: (s) => s.total_views },
+  { label: "Avg Views", unit: "views/vid", ref: 10_000_000, value: (s) => s.avg_views_recent },
+  { label: "Avg Likes", unit: "likes/vid", ref: 500_000, value: (s) => s.avg_likes_recent },
+  { label: "Avg Comments", unit: "comments/vid", ref: 20_000, value: (s) => s.avg_comments_recent },
+  { label: "Uploads Year", unit: "videos", ref: 150, value: (s) => s.recent_uploads },
+  { label: "Videos", unit: "videos", ref: 5_000, value: (s) => s.video_count },
+  { label: "Categories", unit: "genres", ref: 6, value: (s) => s.category_count },
 ];
 
-// Optional metrics — appended only to make up for zeroed core ones (see below).
-// Display-only, like the core metrics: they don't feed playstyles or attributes.
 const OPTIONAL_METRICS: MetricDef[] = [
-  { label: "Account age", unit: "yrs", ref: 15, value: (s) => Math.round(s.account_age_years) },
-  { label: "Active days", unit: "days", ref: 365, value: (s) => s.active_days_recent },
-  { label: "Repositories", unit: "repos", ref: 200, value: (s) => s.public_repos },
-  { label: "Active years", unit: "yrs", ref: 15, value: (s) => s.active_years },
+  { label: "Channel Age", unit: "yrs", ref: 15, value: (s) => Math.round(s.channel_age_years) },
+  { label: "Active Years", unit: "yrs", ref: 15, value: (s) => s.active_years },
 ];
 
 const toMetric = (def: MetricDef, s: Signals): Metric => {
@@ -92,12 +81,9 @@ const toMetric = (def: MetricDef, s: Signals): Metric => {
   return { label: def.label, value, unit: def.unit, score: score99(value, def.ref) };
 };
 
-// Detail metrics: the core bars with any ZEROED ones hidden, plus one optional
-// (non-zero) filler for every zeroed core metric beyond the first — so a sparse
-// profile shows real data (age, active days, repos…) instead of zeros.
 export function deriveMetrics(s: Signals): Metric[] {
   const core = CORE_METRICS.map((d) => toMetric(d, s));
-  const shown = core.filter((m) => m.value > 0); // hide zeroed core metrics
+  const shown = core.filter((m) => m.value > 0);
   const fillerCount = Math.max(0, core.length - shown.length - 1);
   const fillers = OPTIONAL_METRICS.map((d) => toMetric(d, s))
     .filter((m) => m.value > 0)

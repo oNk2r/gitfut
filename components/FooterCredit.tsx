@@ -23,7 +23,7 @@ const AUTHORS: ReadonlyArray<{ handle: string; x: string }> = [
 
 // Footer author credit — "Built by  @younesfdj ✕  &  @wassim_khouas ✕". The repo
 // star CTA moved out to the top-right GithubStar pill, so this is now purely the
-// maker credit. Shared by the home footer (AppShell) and the scout-report footer
+// maker credit. Shared by the home footer (AppShell) and the rating-report footer
 // (ResultView) so they match. A soft dark backdrop lifts the credit off the
 // contribution-grid motif so the text keeps its contrast wherever it lands.
 export default function FooterCredit() {
@@ -36,7 +36,16 @@ export default function FooterCredit() {
       />
 
       <div className="relative flex flex-wrap items-center justify-center gap-x-[6px] gap-y-[4px] text-[13.5px] font-semibold leading-none text-ink-soft">
-        <span className="text-ink-mute">Built by</span>
+        <span className="text-ink-mute">Inspired by</span>
+        <a
+          href="https://gitfut.com"
+          target="_blank"
+          rel="noopener"
+          className="rounded-[7px] px-[6px] py-[3px] text-brand transition hover:bg-white/8 hover:text-brand-hi"
+        >
+          gitfut.com
+        </a>
+        <span className="text-ink-mute">by</span>
 
         {AUTHORS.map((author, i) => (
           <span key={author.x} className="inline-flex items-center gap-[6px]">

@@ -1,10 +1,8 @@
 import Background from "@/components/Background";
 import AppShell from "@/components/AppShell";
 import { getRepoStars } from "@/lib/github/stars";
-import { getScoutCount } from "@/lib/analytics";
+import { getRatingCount } from "@/lib/analytics";
 
-// Dynamic so the live scout count is fresh per load (the stars fetch keeps its
-// own 1h cache regardless).
 export const dynamic = "force-dynamic";
 
 const JSON_LD = {
@@ -12,32 +10,32 @@ const JSON_LD = {
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://gitfut.com/#website",
-      url: "https://gitfut.com",
-      name: "GitFut",
-      description: "Turn any GitHub profile into a player card rated out of 99.",
+      "@id": "https://ytfut.com/#website",
+      url: "https://ytfut.com",
+      name: "YTFut",
+      description: "Turn any YouTube channel into a player card rated out of 99.",
     },
     {
       "@type": "WebApplication",
-      name: "GitFut",
-      url: "https://gitfut.com",
-      applicationCategory: "DeveloperApplication",
+      name: "YTFut",
+      url: "https://ytfut.com",
+      applicationCategory: "EntertainmentApplication",
       operatingSystem: "Web",
       browserRequirements: "Requires JavaScript",
       description:
-        "Turn any GitHub profile into a FIFA-Ultimate-Team-style player card rated out of 99, built from real GitHub stats.",
+        "Turn any YouTube channel into a FIFA-Ultimate-Team-style player card rated out of 99, built from real YouTube stats.",
       offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     },
   ],
 };
 
 export default async function Home() {
-  const [stars, scoutCount] = await Promise.all([getRepoStars(), getScoutCount()]);
+  const [stars, ratingCount] = await Promise.all([getRepoStars(), getRatingCount()]);
   return (
     <div className="relative min-h-screen overflow-x-hidden text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
       <Background />
-      <AppShell stars={stars} scoutCount={scoutCount} />
+      <AppShell stars={stars} ratingCount={ratingCount} />
     </div>
   );
 }

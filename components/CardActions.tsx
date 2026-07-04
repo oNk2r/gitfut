@@ -8,9 +8,6 @@ import { cardUrl, intentUrl, nativeSharePayload } from "@/lib/share";
 import { renderCardImage } from "@/lib/capture";
 import { resolveResultTheme } from "./finishTheme";
 
-// The on-page card is small, so it captures at 3× to hit print resolution. The
-// story frame is already rendered at its native 1080×1920, so 1× is exact —
-// upscaling it would just bloat the file for no added detail.
 const RENDER_OPTS = { pixelRatio: 3, cacheBust: true } as const;
 const STORY_RENDER_OPTS = { pixelRatio: 1, cacheBust: true } as const;
 
@@ -39,7 +36,6 @@ interface ExportAction {
   run: (node: HTMLElement, card: Card) => Promise<void>;
 }
 
-// Image actions only — link/social sharing lives in the visible share row.
 const EXPORTS: ExportAction[] = [
   {
     id: "download",
@@ -48,11 +44,9 @@ const EXPORTS: ExportAction[] = [
     done: "Saved",
     icon: Download,
     run: async (node, card) => {
-      // renderCardImage awaits fonts and captures an off-screen clone that
-      // carries the gitfut.com signature (hidden on the live card).
       const url = await renderCardImage(node, (n) => toPng(n, RENDER_OPTS));
       const a = document.createElement("a");
-      a.download = `${card.login}-gitfut.png`;
+      a.download = `${card.login}-ytfut.png`;
       a.href = url;
       a.click();
     },
@@ -64,9 +58,6 @@ const EXPORTS: ExportAction[] = [
     done: "Copied",
     icon: Copy,
     run: async (node) => {
-      // Pass a Promise<Blob> so clipboard.write() fires synchronously within the
-      // click's user activation; awaiting the (slow, 3x) render first lets the
-      // activation lapse → NotAllowedError. The browser awaits the blob itself.
       await navigator.clipboard.write([
         new ClipboardItem({
           "image/png": renderCardImage(
@@ -87,8 +78,6 @@ const EXPORTS: ExportAction[] = [
 const PLATFORM_BTN =
   "group flex items-center justify-center gap-[7px] rounded-xl border border-line bg-white/[0.03] py-[11px] text-[12.5px] font-semibold text-ink-soft transition-all duration-200 ease-out hover:-translate-y-[1px] hover:bg-[var(--pb)]/[0.12] hover:text-white active:translate-y-0 active:scale-[.98]";
 
-// Brand-colored border + glow on hover, so each target reads as tappable and
-// recognizable rather than three identical grey tabs.
 const brandHover = (brand: string) => ({
   onMouseEnter: (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.style.borderColor = `${brand}66`;
@@ -108,38 +97,25 @@ export default function CardActions({
 }: {
   card: Card;
   targetRef: React.RefObject<HTMLDivElement | null>;
-  /** Off-screen 1080×1920 story canvas, captured for the Instagram-Story export. */
   storyRef?: React.RefObject<HTMLDivElement | null>;
-  /** GitHub-derived flag; the share link only carries ?country= when overridden. */
   canonicalCountry?: string;
 }) {
   const [done, setDone] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
-  // Default true so supported browsers (mobile + modern desktop) render the CTA
-  // with no layout shift; the effect hides it where Web Share is unavailable
-  // (e.g. desktop Firefox) so it never falls back to a redundant X-share.
   const [canNativeShare, setCanNativeShare] = useState(true);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Default is "shown"; only hide where Web Share is missing. The set is
-    // deferred (not synchronous in the effect) so it can't cascade renders.
     const supported = typeof navigator !== "undefined" && typeof navigator.share === "function";
     if (supported) return;
     const t = setTimeout(() => setCanNativeShare(false), 0);
     return () => clearTimeout(t);
   }, []);
 
-  // Download CTA picks up the card's own tier color so the action matches the
-  // card the user is saving (bronze → bronze, silver → silver, TOTY → blue,
-  // founder → their accent).
   const tier = resolveResultTheme(card).ink;
 
-  // The share/copy link carries ?country= ONLY when the flag is a manual override
-  // (differs from the GitHub-derived default). Otherwise we strip it so the URL
-  // stays clean — the recipient still resolves to the same canonical flag.
   const shareCard =
     card.country && card.country !== canonicalCountry ? card : { ...card, country: "" };
 
@@ -149,20 +125,17 @@ export default function CardActions({
     setBusy(a.id);
     setError(null);
     try {
-      await a.run(node, card); // each action awaits fonts.ready itself, so the
-      // clipboard copy can call write() synchronously within the user gesture.
+      await a.run(node, card);
       setDone(a.id);
       setTimeout(() => setDone((d) => (d === a.id ? null : d)), 1500);
     } catch (e) {
-      console.error("[gitfut] card export failed:", e);
+      console.error("[ytfut] card export failed:", e);
       setError(`${a.label} failed: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setBusy(null);
     }
   };
 
-  // Native share sheet — the best one-tap path on mobile (and the only route to
-  // Instagram Stories). Tries to attach the card image; falls back to text+url.
   const nativeShare = async () => {
     const node = targetRef.current;
     const payload = nativeSharePayload(shareCard);
@@ -170,7 +143,7 @@ export default function CardActions({
       if (node && "canShare" in navigator) {
         const blob = await renderCardImage(node, (n) => toBlob(n, RENDER_OPTS));
         if (blob) {
-          const file = new File([blob], `${card.login}-gitfut.png`, { type: "image/png" });
+          const file = new File([blob], `${card.login}-ytfut.png`, { type: "image/png" });
           if (navigator.canShare?.({ files: [file] })) {
             await navigator.share({ ...payload, files: [file] });
             return;
@@ -179,14 +152,11 @@ export default function CardActions({
       }
       await navigator.share(payload);
     } catch (e) {
-      if (e instanceof Error && e.name === "AbortError") return; // user dismissed
+      if (e instanceof Error && e.name === "AbortError") return;
       window.open(intentUrl("x", shareCard), "_blank", "noopener,noreferrer");
     }
   };
 
-  // Instagram-Story export (1080×1920). On mobile, prefer the native share sheet
-  // with the image attached — that's the one-tap route into IG Stories. On
-  // desktop (no file share), fall back to downloading the PNG to upload manually.
   const shareStory = async () => {
     const node = storyRef?.current;
     if (!node || busy) return;
@@ -198,13 +168,8 @@ export default function CardActions({
         if (!b) throw new Error("render returned no image");
         return b;
       });
-      const file = new File([blob], `${card.login}-gitfut-story.png`, { type: "image/png" });
+      const file = new File([blob], `${card.login}-ytfut-story.png`, { type: "image/png" });
 
-      // On mobile, the share sheet is the one-tap route into IG Stories. On
-      // desktop, navigator.share with a file is often advertised (canShare=true)
-      // but no-ops or is dismissed — so it must NEVER be the only outcome.
-      // Only mobile (coarse pointer) attempts share; everyone else downloads,
-      // and a dismissed/failed share also falls back to download.
       const isMobile =
         typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
       let shared = false;
@@ -218,9 +183,8 @@ export default function CardActions({
           shared = true;
         } catch (e) {
           if (e instanceof Error && e.name === "AbortError") {
-            shared = true; // user saw the sheet and chose to dismiss — don't also download
+            shared = true;
           }
-          // any other failure: fall through to download
         }
       }
 
@@ -236,7 +200,7 @@ export default function CardActions({
       setDone("story");
       setTimeout(() => setDone((d) => (d === "story" ? null : d)), 1500);
     } catch (e) {
-      console.error("[gitfut] story export failed:", e);
+      console.error("[ytfut] story export failed:", e);
       setError(`Story failed: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setBusy(null);
@@ -250,19 +214,17 @@ export default function CardActions({
       if (copiedTimer.current) clearTimeout(copiedTimer.current);
       copiedTimer.current = setTimeout(() => setLinkCopied(false), 1600);
     } catch {
-      /* clipboard unavailable — silent */
+      /* clipboard unavailable */
     }
   };
 
   return (
     <div className="flex w-full flex-col gap-[10px]">
-      {/* primary — native share sheet (shown only where it's supported, so it
-          never degrades into a duplicate X-share). Focal green CTA. */}
       {canNativeShare && (
         <button
           type="button"
           onClick={nativeShare}
-          className="font-display group relative flex h-[50px] w-full items-center justify-center gap-[9px] overflow-hidden rounded-xl bg-gradient-to-b from-brand to-brand-mid text-[18px] tracking-[.05em] text-[#04130a] shadow-[0_0_0_1px_rgba(57,211,83,.45),0_10px_28px_-6px_rgba(57,211,83,.5)] transition-all duration-200 ease-out hover:-translate-y-[1px] hover:shadow-[0_0_0_1px_rgba(86,224,107,.6),0_14px_34px_-6px_rgba(57,211,83,.62)] active:translate-y-0 active:scale-[.985] active:duration-75"
+          className="font-display group relative flex h-[50px] w-full items-center justify-center gap-[9px] overflow-hidden rounded-xl bg-gradient-to-b from-brand to-brand-mid text-[18px] tracking-[.05em] text-[#ffffff] shadow-[0_0_0_1px_rgba(255,0,0,.45),0_10px_28px_-6px_rgba(255,0,0,.5)] transition-all duration-200 ease-out hover:-translate-y-[1px] hover:shadow-[0_0_0_1px_rgba(255,77,77,.6),0_14px_34px_-6px_rgba(255,0,0,.62)] active:translate-y-0 active:scale-[.985] active:duration-75"
         >
           <span
             aria-hidden
@@ -273,7 +235,6 @@ export default function CardActions({
         </button>
       )}
 
-      {/* visible share targets — one tap each, always shown */}
       <div className="grid w-full grid-cols-3 gap-[8px]">
         <button
           type="button"
@@ -305,16 +266,14 @@ export default function CardActions({
           title="Copy link to this card"
           aria-label="Copy link to this card"
           className={PLATFORM_BTN}
-          style={{ "--pb": "#39d353" } as React.CSSProperties}
-          {...brandHover("#39d353")}
+          style={{ "--pb": "#ff0000" } as React.CSSProperties}
+          {...brandHover("#ff0000")}
         >
           {linkCopied ? <Check size={15} className="text-brand" /> : <Link2 size={15} />}
           <span className="max-[360px]:hidden">{linkCopied ? "Copied" : "Copy link"}</span>
         </button>
       </div>
 
-      {/* image actions — Download is the highest-intent action (save to repost),
-          so it's the hero of this row; Copy image sits beside it. */}
       {(() => {
         const dl = EXPORTS.find((a) => a.id === "download")!;
         const rest = EXPORTS.filter((a) => a.id !== "download");
@@ -382,9 +341,6 @@ export default function CardActions({
         );
       })()}
 
-      {/* Instagram-Story export — a 1080×1920 vertical image, the format Stories
-          want. One button: shares-with-file on mobile (one tap into IG), or
-          downloads the PNG on desktop. */}
       {storyRef && (
         <button
           type="button"

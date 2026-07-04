@@ -2,28 +2,23 @@ import { describe, expect, it } from "vitest";
 import { buildCard } from "@/lib/scoring/engine";
 import type { Signals } from "@/lib/scoring/types";
 
-// A modest, non-founder profile — exercises the normal scoring path.
 const base: Signals = {
-  login: "octocat",
-  name: "The Octocat",
-  avatarUrl: "https://avatars.githubusercontent.com/u/583231?v=4",
-  location: "San Francisco",
-  followers: 50,
-  account_age_years: 3,
-  public_repos: 20,
-  total_stars_owned: 100,
-  max_repo_stars: 40,
-  languages: 5,
-  rankedLanguages: ["TypeScript", "Go"],
-  topLanguage: "TypeScript",
-  recent_contributions: 300,
-  active_days_recent: 100,
-  active_years: 3,
-  total_contributions_lifetime: 1500,
-  prs_to_others: 5,
-  reviews: 3,
-  issues_closed: 4,
-  recent_commits: 280,
+  login: "@pewdiepie",
+  name: "PewDiePie",
+  avatarUrl: "https://unavatar.io/youtube/pewdiepie",
+  location: "JP",
+  subscribers: 111000000,
+  channel_age_years: 14.1,
+  video_count: 4750,
+  total_views: 29200000000,
+  avg_views_recent: 1400000,
+  category_count: 4,
+  rankedCategories: ["20", "23", "24", "22"],
+  topCategory: "20",
+  recent_uploads: 12,
+  active_years: 14,
+  avg_likes_recent: 95000,
+  avg_comments_recent: 9000,
   recent_spike: false,
 };
 
@@ -59,12 +54,12 @@ describe("buildCard — founder overrides", () => {
   });
 
   it("matches founder logins case-insensitively", () => {
-    expect(buildCard(withLogin("YounesFDJ")).finish).toBe("founder");
-    expect(buildCard(withLogin("MAWSIS")).overall).toBe(91);
+    expect(buildCard(withLogin("@YounesFDJ")).finish).toBe("founder");
+    expect(buildCard(withLogin("@MAWSIS")).overall).toBe(91);
   });
 
   it("leaves non-founders untouched", () => {
-    const card = buildCard(withLogin("some-random-dev"));
+    const card = buildCard(withLogin("@some-random-creator"));
     expect(card.finish).not.toBe("founder");
     expect(card.founder).toBeUndefined();
   });

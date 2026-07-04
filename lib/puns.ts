@@ -8,7 +8,7 @@ export const PUNS: readonly string[] = [
   "Reviewing the tape (your commit history)…",
   "Assessing first touch (force-push reflexes)…",
   "Timing your sprints (and your sprints)…",
-  "Scouting your set pieces (merge conflicts)…",
+  "Rating your set pieces (merge conflicts)…",
   "Weighing your transfer fee (star count)…",
   "Inspecting your stamina (contribution streak)…",
   "Reading your through-balls (pull requests)…",

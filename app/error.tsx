@@ -6,9 +6,9 @@ import Background from "@/components/Background";
 
 // Route-level error boundary. Catches an unexpected throw in the route subtree —
 // a bad render, or an upstream failure that isn't a clean GithubError the page
-// already handles — and shows the scout-themed fallback instead of Next's raw
+// already handles — and shows the rating-themed fallback instead of Next's raw
 // error overlay. `reset` re-renders the segment; the home link is the way out.
-// Mirrors the NotScouted look on the /<user> page so a crash still feels on-brand.
+// Mirrors the NotRated look on the /<user> page so a crash still feels on-brand.
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
     // Surfaces in the server / Vercel logs; the digest ties a user-reported
@@ -20,10 +20,10 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
     <div className="relative min-h-screen overflow-x-hidden text-ink">
       <Background />
       <main className="relative z-[2] mx-auto flex min-h-screen max-w-[560px] flex-col items-center justify-center px-6 text-center">
-        <div className="font-display text-[12px] font-bold tracking-[.3em] text-brand">SCOUT REPORT</div>
-        <h1 className="font-display mt-3 text-[clamp(30px,6vw,48px)] font-black leading-[.95]">The scout hit a snag</h1>
+        <div className="font-display text-[12px] font-bold tracking-[.3em] text-brand">RATING REPORT</div>
+        <h1 className="font-display mt-3 text-[clamp(30px,6vw,48px)] font-black leading-[.95]">The rating hit a snag</h1>
         <p className="mt-3 text-[15.5px] leading-[1.5] text-ink-soft">
-          Something broke mid-scout. Try again — if it keeps happening, the pitch may be down for a moment.
+          Something broke mid-rating. Try again — if it keeps happening, the pitch may be down for a moment.
         </p>
         <div className="mt-7 flex items-center gap-3">
           <button

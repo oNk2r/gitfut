@@ -32,4 +32,4 @@ You'll get an acknowledgement within **72 hours**, and I'll work to ship a fix a
 
 GitFut is a continuously-deployed web app — only the currently deployed version (tracking `master`) is supported. There are no tagged releases to backport fixes to.
 
-Thanks for helping keep scouts safe. 🛡️
+Thanks for helping keep raters safe. 🛡️

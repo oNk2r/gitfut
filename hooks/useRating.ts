@@ -16,7 +16,7 @@ function readCache(login: string): Card | null {
 }
 
 // Re-persist a card under its login (used when the flag is edited on the report,
-// so the chosen country survives a re-scout within the TTL).
+// so the chosen country survives a re-rate within the TTL).
 export function writeCardCache(card: Card): void {
   try {
     localStorage.setItem(cacheKey(card.login), JSON.stringify({ t: Date.now(), card }));
@@ -25,12 +25,12 @@ export function writeCardCache(card: Card): void {
   }
 }
 
-export function useScout() {
+export function useRating() {
   const [card, setCard] = useState<Card | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const scout = async (name: string): Promise<boolean> => {
+  const rate = async (name: string): Promise<boolean> => {
     if (loading) return false;
     const login = name.trim().replace(/^@/, "");
 
@@ -46,7 +46,7 @@ export function useScout() {
     try {
       const res = await fetch(`/api/card/${encodeURIComponent(login)}`);
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Couldn't scout that profile.");
+      if (!res.ok) throw new Error(data.error ?? "Couldn't rate that profile.");
       setCard(data as Card);
       writeCardCache(data as Card);
       return true;
@@ -59,7 +59,7 @@ export function useScout() {
   };
 
   // Edit the current card's flag in place (from the report-page picker) and
-  // persist it so a re-scout within the TTL keeps the choice. The cache write is
+  // persist it so a re-rate within the TTL keeps the choice. The cache write is
   // kept out of the setState updater (updaters must stay pure) — `card` is the
   // current value from the render this handler closed over.
   const setCountry = (code: string) => {
@@ -69,5 +69,5 @@ export function useScout() {
     writeCardCache(next);
   };
 
-  return { card, loading, error, scout, setCountry };
+  return { card, loading, error, rate, setCountry };
 }

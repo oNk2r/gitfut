@@ -108,7 +108,7 @@ export const RESULT_THEME: Record<Finish, ResultTheme> = {
   founder: { glow: "rgba(255,47,69,.4)", chip: "#221016", ink: "#ff6273" },
 };
 
-// Per-card result accent: founders tint the whole scout report to their own
+// Per-card result accent: founders tint the whole rating report to their own
 // accent (red for Younes, chrome for Mawsis); everyone else uses RESULT_THEME.
 export function resolveResultTheme(card: Card): ResultTheme {
   const base = RESULT_THEME[card.finish];

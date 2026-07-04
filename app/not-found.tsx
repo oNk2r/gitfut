@@ -87,7 +87,7 @@ export default function NotFound() {
             href="/"
             className="rounded text-[13.5px] font-medium text-ink-faint underline-offset-4 transition hover:text-brand hover:underline focus-visible:text-brand focus-visible:underline focus-visible:outline-none"
           >
-            Scout a developer &rarr;
+            Rate a creator &rarr;
           </Link>
         </div>
       </main>

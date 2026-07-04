@@ -2,8 +2,7 @@ const noiseSvg =
   '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2"/></filter><rect width="120" height="120" filter="url(#n)"/></svg>';
 const NOISE = `url("data:image/svg+xml;utf8,${encodeURIComponent(noiseSvg)}")`;
 
-// Faint GitHub-contribution-grid motif — a brand signature drawn into the
-// backdrop. A few cells gently pulse green (see .gf-grid-cell in globals.css).
+// Rethemed grid motif: red YouTube-style upload activity grid.
 function ContribGrid() {
   const cols = 30;
   const rows = 7;
@@ -20,7 +19,7 @@ function ContribGrid() {
           width={12}
           height={12}
           rx={2.5}
-          fill={lit ? "#39d353" : "#1b2530"}
+          fill={lit ? "#ff0000" : "#1f1414"}
           className={lit ? "gf-grid-cell" : undefined}
           style={lit ? { ["--gf-dur" as string]: `${2.4 + seed * 0.4}s` } : undefined}
         />,
@@ -43,7 +42,7 @@ function ContribGrid() {
 export default function Background() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden bg-bg">
-      {/* green ambient — the "action" color, top spotlight */}
+      {/* red ambient — the "action" color, top spotlight */}
       <div
         className="animate-flood absolute"
         style={{
@@ -52,7 +51,7 @@ export default function Background() {
           width: "120%",
           height: "92%",
           background:
-            "radial-gradient(50% 62% at 50% 0%, rgba(57,211,83,.16), rgba(13,17,23,.2) 46%, rgba(13,17,23,0) 72%)",
+            "radial-gradient(50% 62% at 50% 0%, rgba(255,0,0,.14), rgba(15,15,15,.2) 46%, rgba(15,15,15,0) 72%)",
         }}
       />
       {/* left cool wash */}
@@ -63,7 +62,7 @@ export default function Background() {
           left: "4%",
           width: "38%",
           height: "78%",
-          background: "radial-gradient(closest-side, rgba(38,166,65,.12), transparent 72%)",
+          background: "radial-gradient(closest-side, rgba(204,0,0,.12), transparent 72%)",
           filter: "blur(18px)",
           transform: "rotate(16deg)",
         }}
@@ -90,10 +89,10 @@ export default function Background() {
           width: "150%",
           height: "55%",
           transform: "translateX(-50%)",
-          background: "radial-gradient(60% 100% at 50% 100%, rgba(1,4,9,.85), transparent 72%)",
+          background: "radial-gradient(60% 100% at 50% 100%, rgba(5,5,5,.85), transparent 72%)",
         }}
       />
-      {/* contribution-grid motif, faint along the bottom */}
+      {/* upload-grid motif, faint along the bottom */}
       <div
         className="absolute bottom-0 left-0 right-0"
         style={{ height: "16%", opacity: 0.5, maskImage: "linear-gradient(to top, #000, transparent)", WebkitMaskImage: "linear-gradient(to top, #000, transparent)" }}

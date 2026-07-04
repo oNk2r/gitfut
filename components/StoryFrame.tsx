@@ -5,31 +5,17 @@ import type { Card } from "@/lib/scoring/types";
 import PlayerCard from "./PlayerCard";
 import { resolveCardTheme, resolveResultTheme } from "./finishTheme";
 
-// Instagram Story canvas (9:16). The frame renders at native resolution: the
-// captured PNG IS these pixels, so the on-page card's pixelRatio:3 upscale is
-// unnecessary — CardActions captures the story at pixelRatio:1.
 const STORY_W = 1080;
 const STORY_H = 1920;
 
-// Instagram overlays its own chrome on the top (~profile/close) and bottom
-// (~caption / "Send message" / reactions) of every story. Keep all content
-// inside this band so the wordmark and — critically — the CTA are never
-// occluded. Designing for the full 1080×1920 designs for a canvas IG never
-// actually shows.
 const SAFE_TOP = 250;
 const SAFE_BOTTOM = 250;
-const SAFE_H = STORY_H - SAFE_TOP - SAFE_BOTTOM; // 1420px usable
 
-// Card width chosen so its height fits the hero zone between the top
-// (wordmark + tagline) and bottom (archetype + CTA) blocks, leaving real
-// breathing room. ~606px → height ≈ 606 × 820/540 ≈ 920px.
 const CARD_W = 606;
-const CARD_H = Math.round(CARD_W * (820 / 540)); // ≈ 920
+const CARD_H = Math.round(CARD_W * (820 / 540));
 
-const BRAND = "#39d353";
+const BRAND = "#ff0000";
 
-// theme.glow is already an `rgba(r,g,b,a)` string (finishTheme.ts). Re-alpha it
-// so we can reuse the tier hue at a chosen opacity for the room wash.
 function rgbaGlow(glow: string, alpha: number): string {
   const m = glow.match(/rgba?\(([^)]+)\)/);
   if (!m) return glow;
@@ -41,9 +27,6 @@ const FONT_DISPLAY = "var(--font-bebas), 'Saira Condensed', sans-serif";
 const FONT_BOLD = "var(--font-din-bold), 'Saira Condensed', sans-serif";
 const FONT_COND = "var(--font-din-cond), 'Saira Condensed', sans-serif";
 
-// Archetype is the card's caption — one line, always. Long archetypes shrink
-// rather than wrap into the CTA below. Deterministic length→size (no DOM
-// measurement) keeps the off-screen capture stable.
 function archetypeSize(label: string): number {
   const n = label.length;
   if (n <= 12) return 58;
@@ -52,11 +35,6 @@ function archetypeSize(label: string): number {
   return 34;
 }
 
-// Hidden, fixed-size story canvas wrapping the existing PlayerCard. Mounted once
-// (off-screen) in ResultView so renderCardImage can clone + capture it through
-// the same proven pipeline as the card — no separate Satori layout, no second
-// React root. PlayerCard itself is untouched (the FUT homage stays pure); all
-// story styling lives in this frame.
 const StoryFrame = forwardRef<HTMLDivElement, { card: Card }>(function StoryFrame(
   { card },
   ref,
@@ -65,11 +43,7 @@ const StoryFrame = forwardRef<HTMLDivElement, { card: Card }>(function StoryFram
   const accent = resolveResultTheme(card).ink;
   const archetype = card.archetype.toUpperCase();
 
-  // Optical centring: a tall card true-centred reads low (the eye weights the
-  // top + drop shadow), so the hero zone sits slightly high in the safe band.
-  // Card top = safe top + top block + a measured gap.
-  const cardTop = SAFE_TOP + 296; // push the card down so the lower third (archetype
-  // + CTA) isn't crammed at the bottom — balances the vertical composition.
+  const cardTop = SAFE_TOP + 296;
 
   const abs = (top: number): CSSProperties => ({
     position: "absolute",
@@ -91,21 +65,14 @@ const StoryFrame = forwardRef<HTMLDivElement, { card: Card }>(function StoryFram
         height: STORY_H,
         overflow: "hidden",
         fontFamily: FONT_DISPLAY,
-        // Neutral near-black stage. The tier colour tints the ROOM (a soft, low-
-        // opacity top wash) but is kept far from the card's own saturation, and a
-        // strong corner vignette darkens the edges — so whatever the card's hue
-        // (red on red, grey on grey, navy on navy), the card stays the most
-        // saturated/brightest object and lifts off the surface. The figure/ground
-        // separation comes from the rim glow + shadow around the card itself
-        // (below), not from a same-hue spotlight that the card dissolves into.
         background: `
           radial-gradient(72% 38% at 50% 6%, ${rgbaGlow(theme.glow, 0.36)}, transparent 72%),
           radial-gradient(120% 100% at 50% 42%, transparent 34%, rgba(0,0,0,0.72) 100%),
-          #07090d
+          #050505
         `,
       }}
     >
-      {/* top — brand wordmark + concept line (sets the frame before the bait) */}
+      {/* top — brand wordmark + concept line */}
       <div style={abs(SAFE_TOP + 8)}>
         <div
           style={{
@@ -116,7 +83,7 @@ const StoryFrame = forwardRef<HTMLDivElement, { card: Card }>(function StoryFram
             color: "#ffffff",
           }}
         >
-          GIT<span style={{ color: BRAND }}>FUT</span>
+          YT<span style={{ color: BRAND }}>FUT</span>
         </div>
         <div
           style={{
@@ -128,11 +95,11 @@ const StoryFrame = forwardRef<HTMLDivElement, { card: Card }>(function StoryFram
             textTransform: "uppercase",
           }}
         >
-          Your GitHub, Scouted
+          Your YouTube, Rated
         </div>
       </div>
 
-      {/* centre — the card, lit by a tier glow halo so it floats off the stage */}
+      {/* centre */}
       <div
         style={{
           position: "absolute",
@@ -142,12 +109,6 @@ const StoryFrame = forwardRef<HTMLDivElement, { card: Card }>(function StoryFram
           width: CARD_W,
         }}
       >
-        {/* Separator stack — what actually lifts the card off the stage on
-            EVERY tier (red-on-red, grey-on-grey, navy-on-navy):
-            (a) a dark "moat" that deepens the immediate surround, then
-            (b) a tight tier-tinted rim glow hugging the card edges for colour
-            lift, then (c) a strong drop shadow for depth. The card ends up the
-            most saturated, brightest, edge-defined object in frame. */}
         <div
           style={{
             position: "absolute",
@@ -179,8 +140,7 @@ const StoryFrame = forwardRef<HTMLDivElement, { card: Card }>(function StoryFram
         </div>
       </div>
 
-      {/* archetype — the card's caption (one line, tier accent), tucked just
-          below the card so it reads as the player's title. */}
+      {/* archetype */}
       <div style={abs(cardTop + CARD_H + 36)}>
         <div
           style={{
@@ -199,11 +159,7 @@ const StoryFrame = forwardRef<HTMLDivElement, { card: Card }>(function StoryFram
         </div>
       </div>
 
-      {/* bottom — the CTA: the loudest text in the lower frame (brand green +
-          arrow), with the bare domain under it. Pinned inside the safe band so
-          IG's bottom bar never eats the conversion. No button container — the
-          story isn't tappable, so it reads as a confident headline, not a fake
-          tap target. Bookends the green "GITFUT" up top. */}
+      {/* bottom — the CTA */}
       <div
         style={{
           position: "absolute",
@@ -228,7 +184,7 @@ const StoryFrame = forwardRef<HTMLDivElement, { card: Card }>(function StoryFram
             whiteSpace: "nowrap",
           }}
         >
-          TRY YOUR CARD ON GITFUT.COM
+          TRY YOUR CARD ON YTFUT.COM
           <span style={{ fontSize: 48 }}>→</span>
         </div>
       </div>

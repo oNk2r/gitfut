@@ -1,18 +1,17 @@
 <div align="center">
 
-<img src="public/mascot.webp" width="120" alt="GitFut mascot">
+<img src="public/mascot.png" width="120" alt="YTFut mascot">
 
-# GitFut
+# YTFut
 
-**your GitHub, rated out of 99** ⚽
+**your YouTube channel, rated out of 99** ⚽
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=20&duration=2600&pause=800&color=39D353&center=true&vCenter=true&width=660&height=42&lines=Turn+any+GitHub+profile+into+a+FIFA-style+card;Scored+live+from+real+commits%2C+stars+%26+PRs;Embed+it+anywhere+%E2%80%94+it+updates+itself" alt="Turn any GitHub profile into a player card, scored live, embeddable anywhere">
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=20&duration=2600&pause=800&color=FF0000&center=true&vCenter=true&width=660&height=42&lines=Turn+any+YouTube+channel+into+a+FIFA-style+card;Scored+live+from+subscribers%2C+views+%26+uploads;Embed+it+anywhere+%E2%80%94+it+updates+itself" alt="Turn any YouTube channel into a player card, scored live, embeddable anywhere">
 
 <br/><br/>
 
-<a href="https://gitfut.com/torvalds"><img src="https://gitfut.com/torvalds.png" width="240" alt="GitFut card"></a>
-<a href="https://gitfut.com/ThePrimeagen"><img src="https://gitfut.com/ThePrimeagen.png" width="240" alt="GitFut card"></a>
-<a href="https://gitfut.com/t3dotgg"><img src="https://gitfut.com/t3dotgg.png" width="240" alt="GitFut card"></a>
+<a href="https://ytfut.com/u/@mrbeast"><img src="https://ytfut.com/api/card-image/@mrbeast" width="240" alt="YTFut card"></a>
+<a href="https://ytfut.com/u/@mkbhd"><img src="https://ytfut.com/api/card-image/@mkbhd" width="240" alt="YTFut card"></a>
 
 <br/><br/>
 
@@ -22,34 +21,34 @@
 
 ## 🃏 &nbsp;Embed your card
 
-Your card lives at a URL. Drop it in your profile README, your portfolio, anywhere — and it **re-scouts itself** as your stats change.
+Your card lives at a URL. Drop it in your markdown, website, portfolio, anywhere — and it **re-rates itself** as your stats change.
 
 ```md
-[![My GitFut card](https://gitfut.com/YOUR_USERNAME.png)](https://gitfut.com/YOUR_USERNAME)
+[![My YTFut card](https://ytfut.com/api/card-image/YOUR_USERNAME)](https://ytfut.com/u/YOUR_USERNAME)
 ```
 
 | | |
 |---|---|
-| **`gitfut.com/<username>.png`** | your card, as a live image |
-| **`gitfut.com/<username>`** | the full scout report |
+| **`ytfut.com/api/card-image/<username>`** | your card, as a live image |
+| **`ytfut.com/u/<username>`** | the full rating report |
 | **`?country=XX`** | override the flag (e.g. `?country=DZ`) |
 
 <br/>
 
-## ⚙️ &nbsp;How the scouting works
+## ⚙️ &nbsp;How the rating works
 
-Six signals from a live GitHub profile, each mapped to a football stat — read straight from GitHub's GraphQL API. No surveys, no self-reporting. Just the commits.
+Six signals from a live YouTube channel, each mapped to a football stat — read straight from YouTube's Data API. No surveys, no self-reporting. Just the content.
 
-| | Stat | Scouted from |
+| | Stat | Rated from |
 |:--:|:--|:--|
-| **PAC** | Pace | Commits in the last year |
-| **SHO** | Shooting | Stars earned across repos |
-| **PAS** | Passing | Pull requests + followers |
-| **DRI** | Dribbling | Language diversity |
-| **DEF** | Defending | Reviews + issues |
-| **PHY** | Physical | Lifetime contributions |
+| **PAC** | Pace | Uploads frequency and schedule consistency |
+| **SHO** | Shooting | Recent average view counts and virality pulls |
+| **PAS** | Passing | Audience engagement (recent comments & likes per view) |
+| **DRI** | Dribbling | Content versatility (number of unique genres covered) |
+| **DEF** | Defending | Average like-to-view ratios and community alignment |
+| **PHY** | Physical | Channel longevity (age) and total views |
 
-Your **overall** is the headline. Raw stats cap at **88** — the 90s are a legacy gate, earned with years and influence, so one heroic year won't crown you an Icon. Your **position** and **archetype** are read from your stat shape: a shooting spike scouts a poacher up top, a defending-and-passing lean scouts a deep playmaker.
+Your **overall** is the headline. Raw stats cap at **88** — the 90s are a legacy gate, earned with years and influence, so one heroic year won't crown you an Icon. Your **position** and **archetype** are read from your stat shape: a shooting spike rates a poacher up top, a defending-and-passing lean rates a deep playmaker.
 
 Every card walks out in a finish:
 
@@ -70,7 +69,7 @@ Every card walks out in a finish:
 
 **Built with** Next.js · TypeScript · Tailwind · Redis
 
-**[gitfut.com](https://gitfut.com)** &nbsp;·&nbsp; scout someone today
+**[ytfut.com](https://ytfut.com)** &nbsp;·&nbsp; rate someone today
 
 <img src="https://capsule-render.vercel.app/api?type=waving&height=90&color=0:39d353,100:006d32&section=footer" alt="" width="100%">
 

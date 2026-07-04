@@ -1,8 +1,8 @@
-// Card-image capture. The card's signature (gitfut.com + @handle) is hidden on
+// Card-image capture. The card's signature (ytfut.com + @handle) is hidden on
 // the live card and only painted into exported images. To keep the watermark out
 // of the on-screen card WITHOUT flashing it during the (slow, ~1s) html-to-image
 // render, we never touch the live node: we render a clone tagged
-// `.gitfut-capturing`, which reveals the signature.
+// `.ytfut-capturing`, which reveals the signature.
 //
 // html-to-image only renders content the browser actually paints/decodes, so the
 // clone CANNOT be parked off-screen (left:-99999px) or display:none'd — both
@@ -10,8 +10,8 @@
 // paints (and its images decode), and wrap it in a 0×0 overflow-hidden holder so
 // the user never sees it.
 
-// Class added to the capture clone; `.gitfut-signature` reveals under it.
-export const SIGNATURE_CLASS = "gitfut-capturing";
+// Class added to the capture clone; `.ytfut-signature` reveals under it.
+export const SIGNATURE_CLASS = "ytfut-capturing";
 
 const nextFrame = () =>
   new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -34,7 +34,7 @@ export async function renderCardImage<T>(
     clone.querySelectorAll<HTMLElement>(".animate-glow").forEach((el) => {
       el.style.display = "none";
     });
-    clone.querySelectorAll<HTMLElement>(".gitfut-card-frame").forEach((el) => {
+    clone.querySelectorAll<HTMLElement>(".ytfut-card-frame").forEach((el) => {
       el.style.filter = "none";
     });
   }

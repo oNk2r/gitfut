@@ -3,24 +3,22 @@ import { after } from "next/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Background from "@/components/Background";
-import { type GithubError } from "@/lib/github/client";
-import { scoutCard } from "@/lib/scout";
+import { type YoutubeError } from "@/lib/youtube/client";
+import { rateCard } from "@/lib/rating";
 import { getRepoStars } from "@/lib/github/stars";
 import { pickFlag } from "@/lib/flagPriority";
-import { recordScout } from "@/lib/analytics";
+import { recordRating } from "@/lib/analytics";
 import type { Card } from "@/lib/scoring/types";
-import ScoutRoute from "./ScoutRoute";
+import RatingRoute from "./RatingRoute";
 
-export const dynamic = "force-dynamic"; // per-user, token-gated, always fresh
+export const dynamic = "force-dynamic";
 
-// Memoised per request so generateMetadata and the page share one scout. The
-// cross-request cache (and the tokenless sample fallback) live in lib/scout.
 const loadCard = cache(
-  async (username: string): Promise<{ card: Card } | { error: GithubError }> => {
+  async (username: string): Promise<{ card: Card } | { error: YoutubeError }> => {
     try {
-      return { card: await scoutCard(username) };
+      return { card: await rateCard(username) };
     } catch (e) {
-      return { error: e as GithubError };
+      return { error: e as YoutubeError };
     }
   },
 );
@@ -30,38 +28,35 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
   const res = await loadCard(username);
   if ("card" in res) {
     return {
-      title: `${res.card.name} — ${res.card.overall} ${res.card.finishLabel} · GitFut`,
-      description: `${res.card.name} scouted on GitFut: ${res.card.overall} OVR ${res.card.position}, ${res.card.archetype}.`,
+      title: `${res.card.name} — ${res.card.overall} ${res.card.finishLabel} · YTFut`,
+      description: `${res.card.name} rated on YTFut: ${res.card.overall} OVR ${res.card.position}, ${res.card.archetype}.`,
       alternates: { canonical: `/${res.card.login}` },
       twitter: { card: "summary_large_image" },
-      // og:image comes from the file-convention opengraph-image.tsx (the landscape
-      // unfurl card). The portrait FUT card lives at /<login>.png for README embeds.
     };
   }
-  // Not a real profile — keep these soft-404s out of the index.
-  return { title: `@${username} · GitFut`, robots: { index: false } };
+  return { title: `@${username} · YTFut`, robots: { index: false } };
 }
 
-function NotScouted({ username, error }: { username: string; error: GithubError }) {
+function NotRated({ username, error }: { username: string; error: YoutubeError }) {
   const rateLimited = error.type === "ratelimit";
-  const heading = rateLimited ? "The scouts are gassed" : "No file found";
+  const heading = rateLimited ? "The raters are gassed" : "No file found";
   const message = rateLimited
-    ? `You lot went viral and stormed the training ground all at once — GitHub just showed us a yellow card for time-wasting. Give the scouts a couple minutes to catch their breath, then send @${username} back on.`
+    ? `You lot went viral and stormed the training ground all at once — YouTube just showed us a yellow card for time-wasting. Give the raters a couple minutes to catch their breath, then send @${username} back on.`
     : error.type === "notfound"
-      ? `There's no GitHub user named @${username}.`
+      ? `There's no YouTube channel named @${username}.`
       : error.type === "invalid"
-        ? `“${username}” isn't a valid GitHub username.`
+        ? `“${username}” isn't a valid YouTube handle.`
         : error.message;
   return (
     <main className="relative z-[2] mx-auto flex min-h-screen max-w-[560px] flex-col items-center justify-center px-6 text-center">
-      <div className="font-display text-[12px] font-bold tracking-[.3em] text-brand">SCOUT REPORT</div>
+      <div className="font-display text-[12px] font-bold tracking-[.3em] text-brand">RATING REPORT</div>
       <h1 className="font-display mt-3 text-[clamp(30px,6vw,48px)] font-black leading-[.95]">{heading}</h1>
       <p className="mt-3 text-[15.5px] leading-[1.5] text-ink-soft">{message}</p>
       <Link
         href="/"
-        className="font-display mt-7 inline-flex h-[46px] items-center rounded-xl bg-brand px-6 text-[16px] tracking-[.06em] text-[#04130a] transition hover:bg-brand-hi"
+        className="font-display mt-7 inline-flex h-[46px] items-center rounded-xl bg-brand px-6 text-[16px] tracking-[.06em] text-[#ffffff] transition hover:bg-brand-hi"
       >
-        {rateLimited ? "BACK TO THE BENCH" : "SCOUT SOMEONE ELSE"}
+        {rateLimited ? "BACK TO THE BENCH" : "RATE SOMEONE ELSE"}
       </Link>
     </main>
   );
@@ -76,17 +71,13 @@ export default async function Page({
 }) {
   const { username } = await params;
   const { country: override } = await searchParams;
-  // Stars feed the footer "Support the project" link; fetched alongside the
-  // scout (its own 1h cache keeps it cheap) so the report matches the home page.
   const [res, stars] = await Promise.all([loadCard(username), getRepoStars()]);
-  // Flag priority: a shared-link ?country= override wins, else the GitHub-derived
-  // country. No IP/geo fallback — we never put the *viewer's* country on someone
-  // else's card.
+  
   let card: Card | null = "card" in res ? res.card : null;
-  let canonicalCountry = ""; // GitHub-derived flag; share links omit ?country= unless overridden
+  let canonicalCountry = "";
   if (card) {
-    after(() => recordScout()); // analytics, flushed after the response (serverless-safe)
-    canonicalCountry = pickFlag(null, card.country) ?? ""; // GitHub-derived only
+    after(() => recordRating());
+    canonicalCountry = pickFlag(null, card.country) ?? "";
     const displayCountry = pickFlag(override, card.country) ?? "";
     card = { ...card, country: displayCountry };
   }
@@ -94,9 +85,9 @@ export default async function Page({
     <div className="relative min-h-screen overflow-x-hidden text-ink">
       <Background />
       {card ? (
-        <ScoutRoute card={card} stars={stars} canonicalCountry={canonicalCountry} />
+        <RatingRoute card={card} stars={stars} canonicalCountry={canonicalCountry} />
       ) : (
-        <NotScouted username={username} error={(res as { error: GithubError }).error} />
+        <NotRated username={username} error={(res as { error: YoutubeError }).error} />
       )}
     </div>
   );

@@ -1,5 +1,5 @@
 import { countryForLogin } from "../geo";
-import { topLanguageLogo } from "../github/languages";
+import { topCategoryLogo } from "../youtube/categories";
 import { deriveMetrics, deriveSkillMoves, deriveStyle, deriveWeakFoot, deriveWorkRate } from "./attributes";
 import { ATTACK_STATS, FINISH_LABELS, FOUNDER_OVERALL, FOUNDERS, K, STATS, WEIGHTS } from "./constants";
 import { derivePlaystyles } from "./playstyles";
@@ -25,16 +25,12 @@ const vals = (s: Profile) => STATS.map((k) => s[k]);
 // §2 — raw estimates, tuned so the six land on a comparable scale.
 function rawStats(s: Signals): Stats {
   const o: Stats = {
-    pac: 36 + 12 * Lg(s.recent_contributions),
-    sho: 36 + 13 * Lg(s.total_stars_owned) + 5 * Lg(s.max_repo_stars),
-    pas: 40 + 12 * Lg(s.prs_to_others) + 9 * Lg(s.followers),
-    // DRI = genuine range, square-root scaled so breadth has diminishing returns:
-    // ~65 at one language, ~80 at ten, ~85 at fifteen. The old linear count
-    // saturated (8 languages already ~94, maxed at 9), letting a noisy signal own
-    // the card and crown every polyglot a Fantasista.
-    dri: 58 + 7 * Math.sqrt(s.languages),
-    def: 40 + 14 * Lg(s.reviews + s.issues_closed),
-    phy: 40 + 9 * Lg(s.total_contributions_lifetime) + 2.2 * Math.min(s.active_years, 12),
+    pac: 30 + 15 * Lg(s.recent_uploads),
+    sho: 20 + 10 * Lg(s.avg_views_recent),
+    pas: 30 + 8 * Lg(s.avg_comments_recent) + 6 * Lg(s.avg_likes_recent),
+    dri: 50 + 12 * Math.sqrt(s.category_count),
+    def: clamp(Math.round(40 + 800 * (s.avg_likes_recent / (s.avg_views_recent || 1))), 1, 99),
+    phy: 25 + 5 * Lg(s.total_views) + 3.0 * Math.min(s.active_years, 12),
   };
   for (const k of STATS) o[k] = clamp(Math.round(o[k]), 1, 99);
   return o;
@@ -44,10 +40,10 @@ function rawStats(s: Signals): Stats {
 function center(s: Signals): number {
   const { w1, w2, w3, w4, b, lo, hi } = K.magnitude;
   const M = sigmoid(
-    w1 * Lg(s.total_stars_owned) +
-      w2 * Lg(s.followers) +
-      w3 * Lg(s.total_contributions_lifetime) +
-      w4 * s.account_age_years +
+    w1 * Lg(s.total_views) +
+      w2 * Lg(s.subscribers) +
+      w3 * Lg(s.avg_views_recent) +
+      w4 * s.channel_age_years +
       b,
   );
   return lerp(lo, hi, M);
@@ -84,8 +80,7 @@ function spike(p: Profile, c: number): Stats {
   STATS.forEach((k) => (raw[k] = c + spread * (p[k] - m)));
   // §3.5 — attacking cohesion: the technical four share sub-skills, so pull them
   // toward their own group mean (preserving order and their collective level)
-  // before rounding. This kills the random-looking 18pt gaps between attacking
-  // stats; DEF/PHY are left free to break away (role explains them).
+  // before rounding.
   const am = mean(ATTACK_STATS.map((k) => raw[k]));
   ATTACK_STATS.forEach((k) => (raw[k] = am + K.spike.cohesion * (raw[k] - am)));
   const stats = {} as Stats;
@@ -126,17 +121,17 @@ function weightedOVR(stats: Stats, family: Family): number {
 function legacyScore(s: Signals): number {
   const { a, b, c, d, e, f, activeCap } = K.legacy;
   const z =
-    a * Math.log(s.account_age_years + 1) +
+    a * Math.log(s.channel_age_years + 1) +
     b * Math.min(s.active_years, activeCap) +
-    c * Lg(s.followers) +
-    d * Lg(s.total_stars_owned) +
-    e * Lg(s.max_repo_stars) -
+    c * Lg(s.subscribers) +
+    d * Lg(s.total_views) +
+    e * Lg(s.video_count) -
     f;
   return sigmoid(z);
 }
 
 function pickFinish(overall: number, L: number, recentSpike: boolean, login: string): Finish {
-  if (K.iconAllowlist.includes(login) || overall >= K.finish.iconMin) return "icon";
+  if (K.iconAllowlist.includes(login.toLowerCase()) || overall >= K.finish.iconMin) return "icon";
   if (overall >= K.finish.totyMin && L >= K.finish.totyLegacy) return "toty";
   if (recentSpike && overall >= K.finish.silverMin) return "totw";
   if (overall >= K.finish.goldMin) return "gold";
@@ -146,27 +141,27 @@ function pickFinish(overall: number, L: number, recentSpike: boolean, login: str
 
 function archetypeFromShape(st: Stats, finish: Finish): Archetype {
   if (finish === "icon")
-    return { name: "Galáctico", blurb: "hall-of-fame maintainer — high and balanced, earned over years" };
+    return { name: "Galáctico", blurb: "hall-of-fame creator — high and balanced influence earned over years" };
   const top = [...STATS].sort((a, b) => st[b] - st[a]);
   const peak = st[top[0]];
   const top2 = top.slice(0, 2);
   const has = (a: StatKey, b: StatKey) => top2.includes(a) && top2.includes(b);
   if (top[0] === "sho" && st.def < peak - 18 && st.pas < peak - 12)
-    return { name: "Poacher", blurb: "one viral repo, clinical — a pure star-magnet finisher" };
+    return { name: "Poacher", blurb: "clinical viral hitter — high view-to-sub content pull" };
   if (top[0] === "pas" && top2.includes("def"))
-    return { name: "Regista", blurb: "deep playmaker — coordinates from the back with cross-repo PRs and reviews" };
+    return { name: "Regista", blurb: "deep community linker — drives high comments and subscriber engagement" };
   if (top[0] === "def" && top2.includes("pas"))
-    return { name: "Libero", blurb: "ball-playing sweeper — a reviewer who also builds, keeping the codebase clean" };
+    return { name: "Libero", blurb: "brand-safe creator — highly liked, stable and clean brand image" };
   if (top[0] === "dri")
-    return { name: "Fantasista", blurb: "the magician — a polyglot working across many stacks" };
-  if (has("phy", "sho")) return { name: "Target Man", blurb: "a prolific shipper whose output lands" };
+    return { name: "Fantasista", blurb: "versatile entertainer — content covers multiple niches and categories" };
+  if (has("phy", "sho")) return { name: "Target Man", blurb: "massive total output and view counts" };
   if (has("phy", "pac") || has("pac", "dri"))
-    return { name: "Mezzala", blurb: "the engine — a relentless box-to-box daily-driver" };
+    return { name: "Mezzala", blurb: "relentless upload engine — consistent frequent shipping" };
   if (top[0] === "def")
-    return { name: "Libero", blurb: "ball-playing sweeper — a reviewer who also builds, keeping the codebase clean" };
+    return { name: "Libero", blurb: "brand-safe creator — highly liked, stable and clean brand image" };
   if (top[0] === "sho")
-    return { name: "Poacher", blurb: "one viral repo, clinical — a pure star-magnet finisher" };
-  return { name: "Mezzala", blurb: "the engine — a relentless box-to-box daily-driver" };
+    return { name: "Poacher", blurb: "clinical viral hitter — high view-to-sub content pull" };
+  return { name: "Mezzala", blurb: "relentless upload engine — consistent frequent shipping" };
 }
 
 export function buildCard(s: Signals): Card {
@@ -175,29 +170,26 @@ export function buildCard(s: Signals): Card {
   const baseOVR = weightedOVR(stats, family);
   const L = legacyScore(s);
 
-  // Founders get a forced overall (>89) and the bespoke "founder" tier. We drive
-  // `finish` directly rather than via pickFinish: any overall >= 90 would
-  // otherwise auto-promote to ICON (and flip club/archetype), hijacking the look.
-  const founder = FOUNDERS[s.login.toLowerCase()];
+  const loginLower = s.login.toLowerCase();
+  const founder = FOUNDERS[loginLower] || FOUNDERS[loginLower.replace(/^@/, "")];
   const overall = founder
-    ? FOUNDER_OVERALL[s.login.toLowerCase()]
+    ? FOUNDER_OVERALL[loginLower] || FOUNDER_OVERALL[loginLower.replace(/^@/, "")]
     : clamp(baseOVR + Math.round(K.legacy.bonusMax * L), 1, 99);
   const finish: Finish = founder ? "founder" : pickFinish(overall, L, s.recent_spike, s.login);
   const archetype = founder
-    ? { name: "Founder", blurb: "co-founder of GitFut — they built the very scout reading this card" }
+    ? { name: "Founder", blurb: "co-founder of YTFut — they built the very rating engine reading this card" }
     : archetypeFromShape(stats, finish);
   const skill = deriveSkillMoves(s);
   const weak = deriveWeakFoot(stats);
   const work = deriveWorkRate(stats);
   const style = deriveStyle(s);
-  // Headline language's own catalog logo (null when it has none) — never a
-  // different language's icon, so the logo always matches `topLanguage`.
-  const languageLogo = topLanguageLogo(s.rankedLanguages ?? []);
+
+  const categoryLogo = topCategoryLogo(s.rankedCategories ?? []);
   return {
     login: s.login,
     name: s.name,
     avatarUrl: s.avatarUrl,
-    country: countryForLogin(s.login, s.location) ?? "",
+    country: s.location || countryForLogin(s.login.replace(/^@/, ""), s.location) || "",
     club: finish === "icon" ? "legends" : "neutral",
     stats,
     position,
@@ -208,8 +200,8 @@ export function buildCard(s: Signals): Card {
     finishLabel: FINISH_LABELS[finish],
     archetype: archetype.name,
     archetypeBlurb: archetype.blurb,
-    topLanguage: s.topLanguage ?? null,
-    languageLogo,
+    topCategory: s.topCategory ?? null,
+    categoryLogo,
     ...(founder ? { founder } : null),
     legacy: { L },
     report: {

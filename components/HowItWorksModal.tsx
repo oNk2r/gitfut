@@ -2,19 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// The six GitHub signals behind each stat — accurate to the engine (PACE is a
-// year of ALL contribution types, not just commits).
 const READS = [
-  { abbr: "PAC", gloss: "A year of commits, PRs, reviews & issues" },
-  { abbr: "SHO", gloss: "Stars earned, and your biggest single hit" },
-  { abbr: "PAS", gloss: "PRs into other people's repos, plus followers" },
-  { abbr: "DRI", gloss: "Your language range — broad helps, but the 10th counts for less" },
-  { abbr: "DEF", gloss: "Code reviews and issues closed" },
-  { abbr: "PHY", gloss: "A lifetime of contributions over your active years" },
+  { abbr: "PAC", gloss: "Your uploads frequency and schedule consistency" },
+  { abbr: "SHO", gloss: "Recent average view counts and virality pulls" },
+  { abbr: "PAS", gloss: "Audience engagement (recent comments & likes per view)" },
+  { abbr: "DRI", gloss: "Your content versatility — number of unique genres covered" },
+  { abbr: "DEF", gloss: "Average like-to-view ratios and community alignment" },
+  { abbr: "PHY", gloss: "Channel longevity (age) and total views over active years" },
 ];
 
-// How the scout reads you — the three things that make a card a fingerprint
-// rather than a score. These are independent truths, not steps, so no 01/02/03.
 const LAWS = [
   {
     kicker: "MEASURED AGAINST YOU",
@@ -34,7 +30,6 @@ const LAWS = [
   },
 ];
 
-// The finish ladder, low to legend — order carries meaning, hence the arrows.
 const LADDER = [
   { label: "BRONZE", bg: "#2A1A0C", ink: "#F0CFA8" },
   { label: "SILVER", bg: "#262B33", ink: "#D6DCE6" },
@@ -48,8 +43,6 @@ export default function HowItWorksModal({ onClose }: { onClose: () => void }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(false);
 
-  // Close on Escape, move focus into the dialog, and play a subtle entrance
-  // (the global reduced-motion reset makes the transition instant when asked).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -76,18 +69,17 @@ export default function HowItWorksModal({ onClose }: { onClose: () => void }) {
         aria-modal="true"
         aria-labelledby="hiw-title"
         onClick={(e) => e.stopPropagation()}
-        className="relative max-h-[88vh] w-[min(600px,100%)] overflow-auto rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,#12161d,#0b0e13)] p-[clamp(24px,4.5vw,40px)] shadow-[0_40px_120px_rgba(0,0,0,.6)] outline-none"
+        className="relative max-h-[88vh] w-[min(600px,100%)] overflow-auto rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,#1c1212,#0f0a0a)] p-[clamp(24px,4.5vw,40px)] shadow-[0_40px_120px_rgba(0,0,0,.6)] outline-none"
         style={{
           opacity: shown ? 1 : 0,
           transform: shown ? "translateY(0) scale(1)" : "translateY(14px) scale(.985)",
           transition: "opacity .4s ease, transform .45s cubic-bezier(.16,1,.3,1)",
         }}
       >
-        {/* brand wash bleeding in along the top edge */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-px"
-          style={{ background: "linear-gradient(90deg, transparent, rgba(57,211,83,.55), transparent)" }}
+          style={{ background: "linear-gradient(90deg, transparent, rgba(255,0,0,.55), transparent)" }}
         />
 
         <button
@@ -98,9 +90,8 @@ export default function HowItWorksModal({ onClose }: { onClose: () => void }) {
           ✕
         </button>
 
-        {/* hero — the thesis: we read you, we don't rate you */}
         <div className="font-mono mb-[14px] text-[11px] font-semibold tracking-[.32em] text-brand">
-          THE SCOUT&apos;S EYE
+          THE RATER&apos;S EYE
         </div>
         <h3
           id="hiw-title"
@@ -111,11 +102,10 @@ export default function HowItWorksModal({ onClose }: { onClose: () => void }) {
           We read you<span className="text-brand">.</span>
         </h3>
         <p className="m-0 mt-[15px] max-w-[47ch] text-[14.5px] leading-[1.55] text-ink-dim">
-          Six signals off your live GitHub, weighed against each other to find your shape. That shape is your card — so
-          two devs with the same numbers still walk out different. Here&apos;s how to read yours.
+          Six signals off your live YouTube channel, weighed against each other to find your shape. That shape is your card — so
+          two creators with the same numbers still walk out different. Here&apos;s how to read yours.
         </p>
 
-        {/* the three laws — hairline-separated, scout-vocab kickers */}
         <div className="mt-[26px] flex flex-col">
           {LAWS.map((law) => {
             const accent = law.gold ? "var(--color-gold-hi)" : "var(--color-brand)";
@@ -134,7 +124,6 @@ export default function HowItWorksModal({ onClose }: { onClose: () => void }) {
           })}
         </div>
 
-        {/* what feeds the six — a compact readout that echoes the card's stat block */}
         <div className="mt-[24px] border-t border-white/[0.08] pt-[20px]">
           <div className="font-mono mb-[14px] text-[10.5px] font-bold tracking-[.2em] text-ink-faint">
             WHAT FEEDS THE SIX
@@ -151,7 +140,6 @@ export default function HowItWorksModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        {/* the ladder — what you're chasing, low to legend */}
         <div className="mt-[24px] border-t border-white/[0.08] pt-[20px]">
           <div className="font-mono mb-[13px] text-[10.5px] font-bold tracking-[.2em] text-ink-faint">THE LADDER</div>
           <div className="flex flex-wrap items-center gap-y-[8px]">
@@ -172,7 +160,7 @@ export default function HowItWorksModal({ onClose }: { onClose: () => void }) {
             ))}
           </div>
           <p className="m-0 mt-[16px] text-[12px] leading-[1.5] text-ink-mute">
-            Read live from your public GitHub via the GraphQL API. No inputs, no edits — just the tape.
+            Read live from your public YouTube channel details via the Data API. No credentials required for public channels, no edits — just the tape.
           </p>
         </div>
       </div>

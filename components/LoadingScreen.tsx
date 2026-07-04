@@ -19,7 +19,7 @@ export default function LoadingScreen({ login }: { login?: string }) {
       <Mascot size={220} kick ball />
 
       <div className="font-display mt-8 text-[clamp(30px,5vw,52px)] leading-none tracking-[.02em] text-ink">
-        SCOUTING{" "}
+        RATING{" "}
         {login && <span className="font-mono align-middle text-[0.5em] text-brand">@{login}</span>}
       </div>
 

@@ -2,13 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { Card } from "@/lib/scoring/types";
 import { cardUrl, intentUrl, nativeSharePayload, shareMessage, shareText } from "@/lib/share";
 
-// We test the share DECISIONS: correct platform endpoints, well-formed encoded
-// URLs, stable per-login text, brag-led message. Not the React wiring.
-
 const card = (over: Partial<Card> = {}): Card =>
   ({
-    login: "torvalds",
-    name: "Linus Torvalds",
+    login: "@mrbeast",
+    name: "MrBeast",
     avatarUrl: "https://example.com/a.png",
     country: "us",
     club: "legends",
@@ -36,31 +33,31 @@ const card = (over: Partial<Card> = {}): Card =>
 
 describe("share service", () => {
   it("builds the canonical card URL from the login, encoding the displayed flag", () => {
-    expect(cardUrl(card())).toBe("https://gitfut.com/torvalds?country=us");
+    expect(cardUrl(card())).toBe("https://ytfut.com/%40mrbeast?country=us");
   });
 
   it("omits the country param when the card has no flag", () => {
-    expect(cardUrl(card({ country: "" }))).toBe("https://gitfut.com/torvalds");
+    expect(cardUrl(card({ country: "" }))).toBe("https://ytfut.com/%40mrbeast");
   });
 
   it("X intent uses /intent/tweet (NOT /intent/post) and carries url + hashtag", () => {
     const u = intentUrl("x", card());
     expect(u).toContain("https://twitter.com/intent/tweet?");
     expect(u).not.toContain("/intent/post");
-    expect(u).toContain("hashtags=GitFut");
-    expect(u).toContain(encodeURIComponent("https://gitfut.com/torvalds?country=us"));
+    expect(u).toContain("hashtags=YTFut");
+    expect(u).toContain(encodeURIComponent("https://ytfut.com/%40mrbeast?country=us"));
   });
 
   it("LinkedIn intent uses share-offsite with only the url (preview from OG)", () => {
     const u = intentUrl("linkedin", card());
     expect(u).toContain("linkedin.com/sharing/share-offsite/?url=");
-    expect(u).toContain(encodeURIComponent("https://gitfut.com/torvalds?country=us"));
+    expect(u).toContain(encodeURIComponent("https://ytfut.com/%40mrbeast?country=us"));
   });
 
   it("WhatsApp intent puts text + url in the message", () => {
     const u = intentUrl("whatsapp", card());
     expect(u).toContain("api.whatsapp.com/send?text=");
-    expect(decodeURIComponent(u)).toContain("gitfut.com/torvalds?country=us");
+    expect(decodeURIComponent(u)).toContain("ytfut.com/%40mrbeast?country=us");
   });
 
   it("share text is deterministic per login and mentions the rating", () => {
@@ -71,19 +68,18 @@ describe("share service", () => {
   });
 
   it("different logins can select different lines", () => {
-    const a = shareText(card({ login: "torvalds" }));
-    const b = shareText(card({ login: "sindresorhus" }));
-    // both are valid lines; at least one should differ across a sample of logins
-    const c = shareText(card({ login: "gaearon" }));
+    const a = shareText(card({ login: "@mrbeast" }));
+    const b = shareText(card({ login: "@mkbhd" }));
+    const c = shareText(card({ login: "@pewdiepie" }));
     expect(new Set([a, b, c]).size).toBeGreaterThan(1);
   });
 
   it("native payload carries title, brag-led text, and url", () => {
     const p = nativeSharePayload(card());
-    expect(p.title).toBe("GitFut");
-    expect(p.url).toBe("https://gitfut.com/torvalds?country=us");
+    expect(p.title).toBe("YTFut");
+    expect(p.url).toBe("https://ytfut.com/%40mrbeast?country=us");
     expect(p.text).toBe(shareMessage(card()));
-    expect(p.text).toContain("get scouted");
+    expect(p.text).toContain("get rated");
   });
 
   it("share message is the text plus the CTA", () => {

@@ -1,6 +1,6 @@
 # Contributing to GitFut
 
-Thanks for wanting to help scout GitHub's finest ⚽ — bug fixes, new playstyles, sharper scoring, and docs are all welcome.
+Thanks for wanting to help rate YouTube's finest ⚽ — bug fixes, new playstyles, sharper scoring, and docs are all welcome.
 
 ## Getting started
 
@@ -17,15 +17,15 @@ Out of the box it runs on a handful of baked sample profiles (Torvalds, ThePrime
 
 ### Environment (optional)
 
-Create a `.env.local` only if you want live scouting or the counter:
+Create a `.env.local` only if you want live rating or the counter:
 
 ```bash
-# Live GitHub scouting (GraphQL). Use a fine-grained, READ-ONLY token with
+# Live YouTube rating.
 # public-repo access — no write scopes are ever needed. Without it, the app
 # serves the baked sample cards.
 GITHUB_TOKEN=github_pat_xxx
 
-# Optional: scout counter + card cache. The app is fully functional without it,
+# Optional: rating counter + card cache. The app is fully functional without it,
 # and won't touch a remote Redis you can't reach — just leave it unset.
 REDIS_URL=redis://localhost:6379
 ```

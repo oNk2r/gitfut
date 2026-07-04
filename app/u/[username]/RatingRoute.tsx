@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ResultView from "@/components/ResultView";
-import { writeCardCache } from "@/hooks/useScout";
+import { writeCardCache } from "@/hooks/useRating";
 import type { Card } from "@/lib/scoring/types";
 
 // Client wrapper: a server component can't pass callbacks across the boundary,
@@ -11,7 +11,7 @@ import type { Card } from "@/lib/scoring/types";
 // updates the card in view, reflects the choice in the URL (?country=, removed
 // when cleared) so a re-share / reload keeps it, and writes the localStorage
 // cache so the home flow sees the same choice within the TTL.
-export default function ScoutRoute({
+export default function RatingRoute({
   card: initial,
   stars,
   canonicalCountry,

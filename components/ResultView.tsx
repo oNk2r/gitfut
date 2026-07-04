@@ -9,10 +9,9 @@ import CardActions from "./CardActions";
 import FlagPicker from "./FlagPicker";
 import Mascot from "./Mascot";
 import FooterCredit from "./FooterCredit";
-import BuyMeACoffee from "./BuyMeACoffee";
 import GithubStar from "./GithubStar";
 import HowItWorksModal from "./HowItWorksModal";
-import { AttributesPanel, MetricsPanel, ReportHeader } from "./ScoutReport";
+import { AttributesPanel, MetricsPanel, ReportHeader } from "./RatingReport";
 import { resolveResultTheme } from "./finishTheme";
 import { useReveal } from "@/hooks/useReveal";
 import { burstConfetti } from "@/lib/confetti";
@@ -20,23 +19,18 @@ import { burstConfetti } from "@/lib/confetti";
 interface Props {
   card: Card;
   onBack: () => void;
-  /** Edit the card's flag from the report (click-the-flag picker). */
   onCountryChange: (code: string) => void;
-  /** Repo stars for the footer credit's star/repo link (null = no count shown). */
   stars?: number | null;
-  /** GitHub-derived flag; share links only carry ?country= when it's overridden. */
   canonicalCountry?: string;
 }
 
-// Card width scales with the viewport but is bounded by BOTH width and height
-// (and a hard min/max) so it never overflows a narrow phone or a short laptop.
 const CARD_WIDTH = "clamp(220px, min(80vw, 40vh), 332px)";
 
-// Confetti palette per tier — gold for prestige, green always woven in (brand).
+// Confetti palette per tier — gold for prestige, red always woven in (brand).
 const CONFETTI: Record<string, string[]> = {
-  toty: ["#e9cc74", "#d4af37", "#7fa8ff", "#ffffff", "#39d353"],
-  icon: ["#e9cc74", "#d4af37", "#f5f0e1", "#ffffff", "#39d353"],
-  totw: ["#39d353", "#e9cc74", "#ffffff", "#7fa8ff"],
+  toty: ["#e9cc74", "#d4af37", "#7fa8ff", "#ffffff", "#ff0000"],
+  icon: ["#e9cc74", "#d4af37", "#f5f0e1", "#ffffff", "#ff0000"],
+  totw: ["#ff0000", "#e9cc74", "#ffffff", "#7fa8ff"],
 };
 
 export default function ResultView({
@@ -52,27 +46,21 @@ export default function ResultView({
   const phase = useReveal(card.finish);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // BACK when the visitor came from home this tab; otherwise (direct / shared
-  // link) a CTA to make their own card. Default to the CTA so share-link
-  // visitors — the growth case — see it without a flash.
   const [seenHome, setSeenHome] = useState(false);
   useEffect(() => {
     let seen = false;
     try {
-      seen = sessionStorage.getItem("gitfut:seen-home") === "1";
+      seen = sessionStorage.getItem("ytfut:seen-home") === "1";
     } catch {}
-    // Deferred (not a synchronous set-in-effect) so it can't cascade a render.
     const t = setTimeout(() => setSeenHome(seen), 0);
     return () => clearTimeout(t);
   }, []);
 
-  // Fire confetti when the rare-tier reveal hits its burst. Founders burst in
-  // their own accent (woven with brand green); other tiers use the palette map.
   useEffect(() => {
     if (phase === "burst") {
       const palette = card.founder
-        ? [card.founder.accent, "#ffffff", "#39d353"]
-        : (CONFETTI[card.finish] ?? ["#39d353", "#e9cc74", "#ffffff"]);
+        ? [card.founder.accent, "#ffffff", "#ff0000"]
+        : (CONFETTI[card.finish] ?? ["#ff0000", "#e9cc74", "#ffffff"]);
       burstConfetti(palette);
     }
   }, [phase, card.finish, card.founder]);
@@ -82,20 +70,16 @@ export default function ResultView({
   return (
     <>
     <main className="relative z-[2] mx-auto flex min-h-[100dvh] w-full max-w-[1280px] flex-col px-[clamp(16px,4vw,22px)]">
-      {/* Tier-reactive backdrop: dims the global green wash and lets the card's
-          own tier color own the result screen (green is the action, the card is
-          the prize — they shouldn't fight here). Fades in with the reveal. */}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
-          background: `radial-gradient(120% 80% at 50% -10%, ${theme.glow}, transparent 55%), #0d1117`,
+          background: `radial-gradient(120% 80% at 50% -10%, ${theme.glow}, transparent 55%), #0f0f0f`,
           opacity: ignited ? 0.9 : 0.4,
           transition: "opacity 1s ease",
         }}
       />
 
-      {/* top bar: BACK button + mascot on the left, "how it works" on the right */}
       <div className="mb-[8px] mt-[clamp(8px,2vh,18px)] flex w-full shrink-0 items-center justify-between gap-[10px]">
         <div className="flex items-center gap-[10px]">
           <button
@@ -114,7 +98,7 @@ export default function ResultView({
             ) : (
               <>
                 <ArrowLeft size={16} className="transition-transform group-hover:translate-x-0.5" />
-                GET SCOUTED
+                GET RATED
               </>
             )}
           </button>
@@ -137,17 +121,13 @@ export default function ResultView({
       </div>
 
       <div className="mt-[clamp(14px,2.4vh,26px)] grid grid-cols-[1fr_auto_1fr] items-start gap-[clamp(16px,2.4vw,40px)] max-[980px]:mt-6 max-[980px]:flex max-[980px]:flex-col max-[980px]:items-center">
-        {/* left — attributes + playstyles */}
         <div className="flex justify-end max-[980px]:order-2 max-[980px]:w-full max-[980px]:max-w-[420px] max-[980px]:justify-center">
           <div className="w-full max-w-[360px]">
             <AttributesPanel card={card} />
           </div>
         </div>
 
-        {/* center — the card + actions (the walkout happens here) */}
         <div className="relative flex flex-col items-center gap-[clamp(12px,2vh,18px)] max-[980px]:order-1">
-          {/* spotlight wash — a soft, diffuse glow from above as the card rises.
-              Reduced + blurred so it reads as ambient light, not a hard beam. */}
           <div
             className="animate-spotlight pointer-events-none absolute left-1/2 top-[-10%] z-0 h-[70%] w-[120%] blur-[40px]"
             style={{
@@ -156,12 +136,8 @@ export default function ResultView({
               transition: "opacity .5s ease",
             }}
           />
-          {/* card stage — holds the captured card AND the flag editor as siblings.
-              The editor overlays the flag slot but lives OUTSIDE captureRef, so the
-              downloaded/copied PNG never includes the picker UI. */}
           <div className="animate-walkout relative" style={{ width: CARD_WIDTH }}>
             <div ref={captureRef} className="relative">
-              {/* tier glow that ignites on reveal */}
               <div
                 className="animate-glow pointer-events-none absolute -inset-[12%] z-0 rounded-full blur-[20px]"
                 style={{
@@ -186,7 +162,6 @@ export default function ResultView({
           </div>
         </div>
 
-        {/* right — scouting metrics */}
         <div className="flex max-[980px]:order-3 max-[980px]:w-full max-[980px]:max-w-[420px] max-[980px]:justify-center">
           <div className="w-full max-w-[360px]">
             <MetricsPanel card={card} />
@@ -198,10 +173,6 @@ export default function ResultView({
         <FooterCredit />
       </footer>
 
-      {/* Off-screen story canvas (1080×1920). Parked in a 0×0 clip holder at the
-          viewport origin — NOT display:none — so its card art/avatar/fonts paint
-          and decode, letting renderCardImage clone + capture it for the Story
-          download/share. Same off-screen technique as lib/capture.ts. */}
       <div
         aria-hidden
         style={{
@@ -218,8 +189,6 @@ export default function ResultView({
         <StoryFrame ref={storyRef} card={card} />
       </div>
     </main>
-
-    <BuyMeACoffee />
 
     {modalOpen && <HowItWorksModal onClose={() => setModalOpen(false)} />}
     </>

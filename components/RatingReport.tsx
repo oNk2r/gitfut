@@ -4,20 +4,19 @@ import { useEffect, useState } from "react";
 import {
   Clock,
   Crown,
-  FastForward,
   Flame,
-  FolderGit2,
-  GitPullRequest,
-  Infinity as InfinityIcon,
-  Languages,
-  type LucideIcon,
-  Shield,
+  LayoutGrid,
+  MessageSquare,
   Star,
+  ThumbsUp,
+  Tv,
   Users,
+  Video,
   Zap,
+  type LucideIcon,
 } from "lucide-react";
 import type { Card, Finish, Metric, Playstyle } from "@/lib/scoring/types";
-import { languageLogoUrl } from "@/lib/github/languages";
+import { categoryLogoUrl } from "@/lib/youtube/categories";
 import { formatCount } from "@/lib/format";
 import { deEmDash } from "@/lib/text";
 import { resolveResultTheme, rgba } from "./finishTheme";
@@ -26,22 +25,18 @@ const PLAYSTYLE_ICONS: Record<string, LucideIcon> = {
   star: Star,
   flame: Flame,
   zap: Zap,
-  "fast-forward": FastForward,
-  infinity: InfinityIcon,
-  shield: Shield,
-  "git-pull-request": GitPullRequest,
-  users: Users,
-  languages: Languages,
-  "folder-git": FolderGit2,
+  tv: Tv,
+  video: Video,
+  "message-square": MessageSquare,
+  "thumbs-up": ThumbsUp,
+  "layout-grid": LayoutGrid,
   clock: Clock,
 };
 
-// Hide a logo/image that fails to load (e.g. a CDN miss) rather than show a broken icon.
 const hideOnError: React.ReactEventHandler<HTMLImageElement> = (e) => {
   e.currentTarget.style.display = "none";
 };
 
-// The scout's one-line verdict — the signature, in recruitment vernacular.
 const VERDICTS: Record<Finish, string> = {
   icon: "Generational talent",
   toty: "Elite prospect",
@@ -52,7 +47,6 @@ const VERDICTS: Record<Finish, string> = {
   founder: "The architect",
 };
 
-// Lightweight hover popup explaining why a value was given.
 function Tip({
   text,
   align = "center",
@@ -95,8 +89,6 @@ function AttributeRow({ label, children }: { label: string; children: React.Reac
   );
 }
 
-// Editorial section: an accent dash + tracked label, then content — reads as a
-// scouting-report section rather than a dashboard card.
 function Section({
   title,
   accent,
@@ -121,7 +113,7 @@ function Section({
 
 function PlaystyleList({ playstyles, accent }: { playstyles: Playstyle[]; accent: string }) {
   if (playstyles.length === 0) {
-    return <p className="py-1 text-[13.5px] leading-snug text-ink-mute">No standout traits yet — keep shipping.</p>;
+    return <p className="py-1 text-[13.5px] leading-snug text-ink-mute">No standout traits yet — keep uploading.</p>;
   }
   return (
     <ul className="flex flex-col gap-[11px] pt-1">
@@ -150,14 +142,9 @@ function PlaystyleList({ playstyles, accent }: { playstyles: Playstyle[]; accent
 }
 
 function MetricBar({ metric, accent, index = 0 }: { metric: Metric; accent: string; index?: number }) {
-  const fill = Math.max(metric.score, 4); // never an empty bar; show a sliver minimum
-  // Entrance: each row eases up + its bar sweeps from 0 to value, staggered down
-  // the list, so the panel "draws itself" like a live scouting readout.
+  const fill = Math.max(metric.score, 4);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    // Set is kept inside the timeout (never synchronous in the effect body) so it
-    // can't cascade renders. Reduced motion uses a 0ms delay — the global
-    // prefers-reduced-motion reset in globals.css makes the transition instant.
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
     const t = setTimeout(() => setMounted(true), reduced ? 0 : 120 + index * 55);
     return () => clearTimeout(t);
@@ -193,8 +180,6 @@ function MetricBar({ metric, accent, index = 0 }: { metric: Metric; accent: stri
   );
 }
 
-// A child that fades + lifts into place on mount, staggered by `step`. Honors
-// reduced motion (appears instantly). Powers the header's cascade entrance.
 function Stagger({ step, children, className }: { step: number; children: React.ReactNode; className?: string }) {
   const [shown, setShown] = useState(false);
   useEffect(() => {
@@ -216,16 +201,11 @@ function Stagger({ step, children, className }: { step: number; children: React.
   );
 }
 
-// Scouting-dossier header. A left "grade stamp" (the OVR + tier, the scout's
-// verdict-at-a-glance) anchors the row; the identity block sits beside it with
-// the name as hero, one clean meta line, and the verdict inline. No centered
-// stack, no floating pill, no decorative flanking rules.
 export function ReportHeader({ card }: { card: Card }) {
   const theme = resolveResultTheme(card);
   const accent = theme.ink;
   return (
     <header className="relative mx-auto flex max-w-[640px] items-center gap-[clamp(16px,3vw,28px)]">
-      {/* left — the grade stamp: OVR over tier, the dossier's headline metric */}
       <Stagger step={0} className="shrink-0">
         <div
           className="relative flex h-[clamp(78px,13vw,98px)] w-[clamp(78px,13vw,98px)] flex-col items-center justify-center rounded-2xl border"
@@ -247,11 +227,10 @@ export function ReportHeader({ card }: { card: Card }) {
         </div>
       </Stagger>
 
-      {/* right — identity block, left-aligned */}
       <div className="min-w-0 flex-1 text-left">
         <Stagger step={1}>
           <div className="flex items-center gap-[8px]">
-            <span className="font-display text-[11px] font-bold tracking-[.3em] text-brand">SCOUT REPORT</span>
+            <span className="font-display text-[11px] font-bold tracking-[.3em] text-brand">RATING REPORT</span>
             <span aria-hidden className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
           </div>
         </Stagger>
@@ -265,7 +244,7 @@ export function ReportHeader({ card }: { card: Card }) {
           <h2
             className="font-display mt-[2px] truncate text-[clamp(32px,5.4vw,56px)] font-black leading-[.92]"
             style={{
-              backgroundImage: `linear-gradient(100deg, #e6edf3 0%, #e6edf3 38%, ${accent} 50%, #fff 54%, #e6edf3 64%, #e6edf3 100%)`,
+              backgroundImage: `linear-gradient(100deg, #f1f1f1 0%, #f1f1f1 38%, ${accent} 50%, #fff 54%, #f1f1f1 64%, #f1f1f1 100%)`,
               backgroundSize: "220% 100%",
               WebkitBackgroundClip: "text",
               backgroundClip: "text",
@@ -303,34 +282,33 @@ export function ReportHeader({ card }: { card: Card }) {
             <span className="text-[14px] font-medium text-ink-dim">{card.archetype}</span>
             <span aria-hidden className="h-[11px] w-px bg-white/15" />
             <a
-              href={`https://github.com/${card.login}`}
+              href={`https://youtube.com/${card.login}`}
               target="_blank"
               rel="noopener noreferrer"
               className="font-mono text-[13px] text-ink-faint underline-offset-2 transition hover:text-brand hover:underline"
             >
-              @{card.login}
+              {card.login}
             </a>
-            {card.topLanguage && (
+            {card.topCategory && (
               <>
                 <span aria-hidden className="h-[11px] w-px bg-white/15" />
                 <span className="inline-flex items-center gap-[6px] text-[13px] text-ink-dim">
-                  {card.languageLogo && (
+                  {card.categoryLogo && (
                     <img
-                      src={languageLogoUrl(card.languageLogo.slug)}
+                      src={categoryLogoUrl(card.categoryLogo.slug)}
                       onError={hideOnError}
                       alt=""
                       aria-hidden
-                      className="h-[15px] w-[15px] object-contain"
+                      className="h-[15px] w-[15px] object-contain filter invert opacity-80"
                     />
                   )}
-                  {card.topLanguage}
+                  {card.topCategory}
                 </span>
               </>
             )}
           </div>
         </Stagger>
 
-        {/* verdict inline: label + grade, then the blurb continues the sentence */}
         <Stagger step={4}>
           <p className="mt-[9px] line-clamp-2 text-[13.5px] leading-[1.5] text-ink-soft">
             <span className="font-display mr-[7px] text-[11px] font-bold tracking-[.18em]" style={{ color: accent }}>
@@ -344,7 +322,6 @@ export function ReportHeader({ card }: { card: Card }) {
   );
 }
 
-// Left side: attributes + playstyles.
 export function AttributesPanel({ card }: { card: Card }) {
   const accent = resolveResultTheme(card).ink;
   const { report } = card;
@@ -382,11 +359,10 @@ export function AttributesPanel({ card }: { card: Card }) {
   );
 }
 
-// Right side: scouting metrics.
 export function MetricsPanel({ card }: { card: Card }) {
   const accent = resolveResultTheme(card).ink;
   return (
-    <Section title="SCOUTING METRICS" accent={accent} className="w-full">
+    <Section title="RATING METRICS" accent={accent} className="w-full">
       <div className="flex flex-col gap-[13px] pt-1">
         {card.report.metrics.map((m, i) => (
           <MetricBar key={m.label} metric={m} accent={accent} index={i} />
