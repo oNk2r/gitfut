@@ -235,58 +235,31 @@ export default function CardActions({
         </button>
       )}
 
-      <div className="grid w-full grid-cols-3 gap-[8px]">
+      <div className="grid w-full grid-cols-2 gap-[8px]">
         <button
           type="button"
           onClick={() => window.open(intentUrl("x", shareCard), "_blank", "noopener,noreferrer")}
           title="Share on X"
           aria-label="Share on X"
-          className={PLATFORM_BTN}
+          className="group flex items-center justify-center gap-[8px] rounded-xl border border-line bg-white/[0.03] py-[12px] text-[13.5px] font-semibold text-ink-soft transition-all duration-200 ease-out hover:-translate-y-[1px] hover:bg-white/[0.08] hover:text-white active:translate-y-0 active:scale-[.98]"
           style={{ "--pb": "#ffffff" } as React.CSSProperties}
           {...brandHover("#ffffff")}
         >
           <XLogo size={15} />
-          <span className="max-[360px]:hidden">X</span>
+          <span>Share on X</span>
         </button>
-        <button
-          type="button"
-          onClick={() => window.open(intentUrl("linkedin", shareCard), "_blank", "noopener,noreferrer")}
-          title="Share on LinkedIn"
-          aria-label="Share on LinkedIn"
-          className={PLATFORM_BTN}
-          style={{ "--pb": "#3b9eff" } as React.CSSProperties}
-          {...brandHover("#3b9eff")}
-        >
-          <LinkedInLogo size={15} />
-          <span className="max-[360px]:hidden">LinkedIn</span>
-        </button>
-        <button
-          type="button"
-          onClick={copyLink}
-          title="Copy link to this card"
-          aria-label="Copy link to this card"
-          className={PLATFORM_BTN}
-          style={{ "--pb": "#ff0000" } as React.CSSProperties}
-          {...brandHover("#ff0000")}
-        >
-          {linkCopied ? <Check size={15} className="text-brand" /> : <Link2 size={15} />}
-          <span className="max-[360px]:hidden">{linkCopied ? "Copied" : "Copy link"}</span>
-        </button>
-      </div>
 
-      {(() => {
-        const dl = EXPORTS.find((a) => a.id === "download")!;
-        const rest = EXPORTS.filter((a) => a.id !== "download");
-        const dlDone = done === dl.id;
-        const dlBusy = busy === dl.id;
-        const DlIcon = dl.icon;
-        return (
-          <div className="grid w-full grid-cols-[1.6fr_1fr] gap-[8px]">
+        {(() => {
+          const dl = EXPORTS.find((a) => a.id === "download")!;
+          const dlDone = done === dl.id;
+          const dlBusy = busy === dl.id;
+          const DlIcon = dl.icon;
+          return (
             <button
               onClick={() => runExport(dl)}
               disabled={dlBusy}
-              title="Download your card as an image"
-              aria-label="Download your card as an image"
+              title="Download card as PNG"
+              aria-label="Download card as PNG"
               className="group relative flex items-center justify-center gap-[8px] overflow-hidden rounded-xl border py-[12px] text-[13.5px] font-bold tracking-[.02em] transition-all duration-200 ease-out hover:-translate-y-[1px] active:translate-y-0 active:scale-[.98] disabled:opacity-70"
               style={{ color: tier, borderColor: `${tier}66`, background: `${tier}1f` }}
               onMouseEnter={(e) => {
@@ -312,54 +285,9 @@ export default function CardActions({
               )}
               {dlBusy ? "Saving…" : dlDone ? "Saved" : "Download"}
             </button>
-
-            {rest.map((a) => {
-              const isDone = done === a.id;
-              const isBusy = busy === a.id;
-              const Icon = a.icon;
-              return (
-                <button
-                  key={a.id}
-                  onClick={() => runExport(a)}
-                  disabled={isBusy}
-                  title={a.title}
-                  aria-label={a.title}
-                  className="group inline-flex items-center justify-center gap-[6px] rounded-xl border border-line bg-white/[0.03] py-[12px] text-[12.5px] font-semibold text-ink-soft transition-all duration-200 ease-out hover:-translate-y-[1px] hover:border-white/25 hover:bg-white/[0.07] hover:text-white active:translate-y-0 active:scale-[.98] disabled:opacity-60"
-                >
-                  {isBusy ? (
-                    <span className="h-[13px] w-[13px] animate-spin rounded-full border-[1.5px] border-white/25 border-t-white/80" />
-                  ) : isDone ? (
-                    <Check size={14} className="text-brand" />
-                  ) : (
-                    <Icon size={14} className="transition-colors group-hover:text-white" />
-                  )}
-                  {isBusy ? "…" : isDone ? a.done : a.label}
-                </button>
-              );
-            })}
-          </div>
-        );
-      })()}
-
-      {storyRef && (
-        <button
-          type="button"
-          onClick={shareStory}
-          disabled={busy === "story"}
-          title="Download a 1080×1920 image sized for Instagram Stories"
-          aria-label="Download a story-format image for Instagram Stories"
-          className="group inline-flex w-full items-center justify-center gap-[8px] rounded-xl border border-line bg-white/[0.03] py-[12px] text-[12.5px] font-semibold text-ink-soft transition-all duration-200 ease-out hover:-translate-y-[1px] hover:border-[#e1306c]/55 hover:bg-[#e1306c]/[0.1] hover:text-white hover:shadow-[0_8px_22px_-10px_rgba(225,48,108,.8)] active:translate-y-0 active:scale-[.98] disabled:opacity-60"
-        >
-          {busy === "story" ? (
-            <span className="h-[14px] w-[14px] animate-spin rounded-full border-[1.5px] border-white/25 border-t-white/80" />
-          ) : done === "story" ? (
-            <Check size={15} className="text-brand" />
-          ) : (
-            <ImageDown size={15} className="transition-colors group-hover:text-[#ff5a8a]" />
-          )}
-          {busy === "story" ? "Rendering…" : done === "story" ? "Done" : "Story format"}
-        </button>
-      )}
+          );
+        })()}
+      </div>
 
       {error && <p className="text-center text-[12px] leading-snug text-[#ff9d96]">{error}</p>}
     </div>

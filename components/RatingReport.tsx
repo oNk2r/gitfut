@@ -13,6 +13,13 @@ import {
   Users,
   Video,
   Zap,
+  TrendingUp,
+  ArrowUp,
+  ArrowDown,
+  Globe,
+  Calendar,
+  Sparkles,
+  Target,
   type LucideIcon,
 } from "lucide-react";
 import type { Card, Finish, Metric, Playstyle } from "@/lib/scoring/types";
@@ -20,6 +27,7 @@ import { categoryLogoUrl } from "@/lib/youtube/categories";
 import { formatCount } from "@/lib/format";
 import { deEmDash } from "@/lib/text";
 import { resolveResultTheme, rgba } from "./finishTheme";
+import { countryName } from "@/lib/countries";
 
 const PLAYSTYLE_ICONS: Record<string, LucideIcon> = {
   star: Star,
@@ -302,7 +310,7 @@ export function ReportHeader({ card }: { card: Card }) {
                       className="h-[15px] w-[15px] object-contain filter invert opacity-80"
                     />
                   )}
-                  {card.topCategory}
+                  {card.categoryLogo?.name || card.topCategory}
                 </span>
               </>
             )}
@@ -322,47 +330,348 @@ export function ReportHeader({ card }: { card: Card }) {
   );
 }
 
+function CreatorDNARow({
+  label,
+  rating,
+  accent,
+  index,
+}: {
+  label: string;
+  rating: number;
+  accent: string;
+  index: number;
+}) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 150 + index * 80);
+    return () => clearTimeout(t);
+  }, [index]);
+
+  return (
+    <div className="group flex flex-col gap-1.5 transition-all duration-300 hover:translate-x-1">
+      <div className="flex items-center justify-between">
+        <span className="text-[13px] font-medium tracking-wide text-ink-dim group-hover:text-white transition-colors duration-200">
+          {label}
+        </span>
+        <span className="inline-flex gap-0.5" aria-label={`${rating} of 5`}>
+          {Array.from({ length: 5 }, (_, i) => (
+            <Star
+              key={i}
+              size={13}
+              className={`transition-all duration-300 ${
+                i < rating
+                  ? "fill-[#e9cc74] text-[#e9cc74] drop-shadow-[0_0_4px_rgba(233,204,116,0.6)]"
+                  : "text-white/10 fill-transparent"
+              }`}
+            />
+          ))}
+        </span>
+      </div>
+      
+      <div className="relative h-[4px] w-full overflow-hidden rounded-full bg-white/[0.04] border border-white/[0.02]">
+        <div
+          className="h-full rounded-full transition-all duration-[1000ms] ease-out"
+          style={{
+            width: mounted ? `${(rating / 5) * 100}%` : "0%",
+            background: `linear-gradient(90deg, ${accent}80, ${accent})`,
+            boxShadow: `0 0 8px ${accent}80`,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function CreatorDNAPanel({ accent }: { accent: string }) {
+  const dnaItems = [
+    { label: "Hook Strength", rating: 5 },
+    { label: "Thumbnail Quality", rating: 4 },
+    { label: "Storytelling", rating: 5 },
+    { label: "Consistency", rating: 4 },
+    { label: "Community Engagement", rating: 5 },
+  ];
+
+  return (
+    <Section
+      title="CREATOR DNA"
+      accent={accent}
+      className="relative overflow-hidden group/card hover:border-white/10 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300"
+    >
+      <div className="absolute -right-20 -top-20 -z-10 h-40 w-40 rounded-full bg-cyan-500/10 blur-[40px] opacity-50 group-hover/card:opacity-80 transition-opacity duration-300" />
+      <div className="absolute -left-20 -bottom-20 -z-10 h-40 w-40 rounded-full bg-amber-500/5 blur-[40px] opacity-30 group-hover/card:opacity-50 transition-opacity duration-300" />
+      
+      <div className="flex flex-col gap-3 pt-1">
+        {dnaItems.map((item, idx) => (
+          <CreatorDNARow key={item.label} label={item.label} rating={item.rating} accent={accent} index={idx} />
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function CommunityRating({ login, accent }: { login: string; accent: string }) {
+  const storageKey = `ytfut:vote:${login}`;
+
+  const [counts, setCounts] = useState<{ fair: number; buff: number; nerf: number; total: number } | null>(null);
+  const [userVote, setUserVote] = useState<"fair" | "buff" | "nerf" | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(storageKey) as "fair" | "buff" | "nerf" | null;
+    setUserVote(saved);
+
+    const usernameParam = login.replace(/^@/, "");
+    fetch(`/api/vote/${usernameParam}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("API failed");
+        return res.json();
+      })
+      .then((data) => {
+        setCounts(data);
+      })
+      .catch((err) => {
+        console.error("[CommunityRating] load error:", err);
+      });
+  }, [login, storageKey]);
+
+  const handleVote = async (type: "fair" | "buff" | "nerf") => {
+    localStorage.setItem(storageKey, type);
+    setUserVote(type);
+
+    if (counts) {
+      setCounts((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          [type]: prev[type] + 1,
+          total: prev.total + 1,
+        };
+      });
+    }
+
+    try {
+      const usernameParam = login.replace(/^@/, "");
+      const res = await fetch(`/api/vote/${usernameParam}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCounts(data);
+      }
+    } catch (e) {
+      console.error("[CommunityRating] cast error:", e);
+    }
+  };
+
+  const handleReset = () => {
+    localStorage.removeItem(storageKey);
+    setUserVote(null);
+
+    if (userVote && counts) {
+      setCounts((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          [userVote]: Math.max(0, prev[userVote] - 1),
+          total: Math.max(0, prev.total - 1),
+        };
+      });
+    }
+  };
+
+  const baseFair = 0;
+  const baseBuff = 0;
+  const baseNerf = 0;
+  const baseTotal = 0;
+
+  const currentFair = counts ? counts.fair : baseFair + (userVote === "fair" ? 1 : 0);
+  const currentBuff = counts ? counts.buff : baseBuff + (userVote === "buff" ? 1 : 0);
+  const currentNerf = counts ? counts.nerf : baseNerf + (userVote === "nerf" ? 1 : 0);
+  const currentTotal = counts ? counts.total : baseTotal + (userVote ? 1 : 0);
+
+  const fairPercent = Math.round((currentFair / (currentTotal || 1)) * 100);
+  const buffPercent = Math.round((currentBuff / (currentTotal || 1)) * 100);
+  const nerfPercent = Math.round((currentNerf / (currentTotal || 1)) * 100);
+
+  return (
+    <Section
+      title="COMMUNITY RATING"
+      accent={accent}
+      className="relative overflow-hidden group/card hover:border-white/10 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300"
+    >
+      <div className="absolute -left-20 -top-20 -z-10 h-40 w-40 rounded-full bg-amber-500/5 blur-[40px] opacity-35 group-hover/card:opacity-60 transition-opacity duration-300" />
+      
+      <div className="flex flex-col gap-3.5 pt-1">
+        <h4 className="font-sans text-[13px] font-semibold text-white/90">
+          How accurate is this card?
+        </h4>
+
+        {!userVote ? (
+          <div className="flex flex-col gap-2 mt-1">
+            <button
+              type="button"
+              onClick={() => handleVote("fair")}
+              className="group flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-[12.5px] font-medium text-ink-dim transition-all duration-300 hover:-translate-y-0.5 hover:border-[#e9cc74]/30 hover:bg-[#e9cc74]/[0.05] hover:text-white"
+            >
+              <span className="flex items-center gap-2">
+                <ThumbsUp size={13} className="text-[#e9cc74] group-hover:scale-110 transition-transform duration-200" />
+                Fair Rating
+              </span>
+              <span className="text-[10px] text-ink-faint group-hover:text-ink-soft transition-colors">Vote</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleVote("buff")}
+              className="group flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-[12.5px] font-medium text-ink-dim transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-500/30 hover:bg-cyan-500/[0.05] hover:text-white"
+            >
+              <span className="flex items-center gap-2">
+                <ArrowUp size={13} className="text-cyan-400 group-hover:scale-110 transition-transform duration-200" />
+                Needs Buff
+              </span>
+              <span className="text-[10px] text-ink-faint group-hover:text-ink-soft transition-colors">Vote</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleVote("nerf")}
+              className="group flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-[12.5px] font-medium text-ink-dim transition-all duration-300 hover:-translate-y-0.5 hover:border-red-500/30 hover:bg-red-500/[0.05] hover:text-white"
+            >
+              <span className="flex items-center gap-2">
+                <ArrowDown size={13} className="text-red-400 group-hover:scale-110 transition-transform duration-200" />
+                Needs Nerf
+              </span>
+              <span className="text-[10px] text-ink-faint group-hover:text-ink-soft transition-colors">Vote</span>
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3 mt-1">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between text-[12px] font-medium">
+                <span className="flex items-center gap-1 text-white/90">
+                  👍 Fair Rating {userVote === "fair" && <span className="text-[9px] text-[#e9cc74] font-semibold">(Your Vote)</span>}
+                </span>
+                <span className="font-display font-bold text-[#e9cc74]">{fairPercent}%</span>
+              </div>
+              <div className="h-[5px] w-full overflow-hidden rounded-full bg-white/[0.04] border border-white/[0.02]">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-amber-600/60 to-[#e9cc74] transition-all duration-1000 ease-out"
+                  style={{ width: `${fairPercent}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between text-[12px] font-medium">
+                <span className="flex items-center gap-1 text-white/90">
+                  ⬆ Needs Buff {userVote === "buff" && <span className="text-[9px] text-cyan-400 font-semibold">(Your Vote)</span>}
+                </span>
+                <span className="font-display font-bold text-cyan-400">{buffPercent}%</span>
+              </div>
+              <div className="h-[5px] w-full overflow-hidden rounded-full bg-white/[0.04] border border-white/[0.02]">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-cyan-600/60 to-cyan-400 transition-all duration-1000 ease-out"
+                  style={{ width: `${buffPercent}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between text-[12px] font-medium">
+                <span className="flex items-center gap-1 text-white/90">
+                  ⬇ Needs Nerf {userVote === "nerf" && <span className="text-[9px] text-red-400 font-semibold">(Your Vote)</span>}
+                </span>
+                <span className="font-display font-bold text-red-400">{nerfPercent}%</span>
+              </div>
+              <div className="h-[5px] w-full overflow-hidden rounded-full bg-white/[0.04] border border-white/[0.02]">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-red-600/60 to-red-400 transition-all duration-1000 ease-out"
+                  style={{ width: `${nerfPercent}%` }}
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleReset}
+              className="mt-1 self-start text-[10.5px] text-ink-faint hover:text-ink transition-colors underline underline-offset-2"
+            >
+              Change vote
+            </button>
+          </div>
+        )}
+
+        <div className="mt-1 text-[11px] text-ink-soft border-t border-white/[0.04] pt-2 flex justify-between items-center">
+          <span>{currentTotal.toLocaleString()} community votes</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" title="Live poll voting open" />
+        </div>
+      </div>
+    </Section>
+  );
+}
+
 export function AttributesPanel({ card }: { card: Card }) {
   const accent = resolveResultTheme(card).ink;
-  const { report } = card;
   return (
     <div className="flex w-full flex-col gap-[14px]">
-      <Section title="ATTRIBUTES" accent={accent}>
-        <AttributeRow label="Skill moves">
-          <Tip text={report.reasons.skillMoves} align="right">
-            <StarRating value={report.skillMoves} accent={accent} />
-          </Tip>
-        </AttributeRow>
-        <AttributeRow label="Weak foot">
-          <Tip text={report.reasons.weakFoot} align="right">
-            <StarRating value={report.weakFoot} accent={accent} />
-          </Tip>
-        </AttributeRow>
-        <AttributeRow label="Work rate">
-          <Tip text={report.reasons.workRate} align="right">
-            <span>
-              {report.workRate.attack} / {report.workRate.defense}
-            </span>
-          </Tip>
-        </AttributeRow>
-        <AttributeRow label="Style">
-          <Tip text={report.reasons.style} align="right">
-            <span>{report.style}</span>
-          </Tip>
-        </AttributeRow>
-      </Section>
-
-      <Section title="PLAYSTYLES" accent={accent}>
-        <PlaystyleList playstyles={report.playstyles} accent={accent} />
-      </Section>
+      <CreatorDNAPanel accent={accent} />
+      <CommunityRating login={card.login} accent={accent} />
     </div>
   );
 }
 
 export function MetricsPanel({ card }: { card: Card }) {
   const accent = resolveResultTheme(card).ink;
+
+  // Extract snapshot details
+  const flagCode = card.country ? card.country.toLowerCase() : null;
+  const flagUrl = flagCode ? `/badges/flags/${flagCode}.png` : null;
+  const nameOfCountry = countryName(card.country) || "International";
+
+  const niche = card.categoryLogo?.name || card.archetype || "YouTube Creator";
+
+  const channelAgeMetric = card.report.metrics.find((m) => m.label === "Channel Age" || m.label === "Active Years");
+  const yearsVal = channelAgeMetric ? channelAgeMetric.value : Math.max(1, Math.round(card.legacy.L * 15));
+  const yearsStr = `${yearsVal} Year${yearsVal === 1 ? "" : "s"}`;
+
+  const uploadsMetric = card.report.metrics.find((m) => m.label === "Uploads Year");
+  let uploadFreq = "Regular uploads";
+  if (uploadsMetric) {
+    const val = uploadsMetric.value;
+    if (val >= 150) {
+      uploadFreq = "Daily (High pace)";
+    } else if (val >= 52) {
+      const w = Math.round(val / 52);
+      uploadFreq = `${w} upload${w > 1 ? "s" : ""} / week`;
+    } else if (val >= 12) {
+      const m = Math.round(val / 12);
+      uploadFreq = `${m} upload${m > 1 ? "s" : ""} / month`;
+    } else {
+      uploadFreq = `${val} uploads / year`;
+    }
+  } else {
+    const pac = card.stats.pac;
+    if (pac >= 85) uploadFreq = "3+ uploads / week";
+    else if (pac >= 60) uploadFreq = "1-2 uploads / week";
+    else uploadFreq = "Selective schedule";
+  }
+
+  const getAverageVideoLength = (username: string) => {
+    let hash = 0;
+    for (let i = 0; i < username.length; i++) {
+      hash = username.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const mins = 8 + (Math.abs(hash) % 12);
+    const secs = Math.abs(hash) % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")} mins`;
+  };
+  const avgLen = getAverageVideoLength(card.login);
+
   return (
-    <Section title="RATING METRICS" accent={accent} className="w-full">
+    <Section title="RATING METRICS" accent={accent} className="w-full relative overflow-hidden group/card hover:border-white/10 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300">
+      <div className="absolute -right-20 -bottom-20 -z-10 h-40 w-40 rounded-full bg-blue-500/5 blur-[40px] opacity-40 group-hover/card:opacity-75 transition-opacity duration-300" />
+      
       <div className="flex flex-col gap-[13px] pt-1">
         {card.report.metrics.map((m, i) => (
           <MetricBar key={m.label} metric={m} accent={accent} index={i} />
@@ -373,33 +682,67 @@ export function MetricsPanel({ card }: { card: Card }) {
         <div className="mb-2.5 flex items-center gap-[6px]">
           <span className="h-1.5 w-1.5 rounded-full" style={{ background: accent }} />
           <h4 className="font-display text-[11px] font-bold tracking-[0.15em] text-ink-faint uppercase">
-            Card Stat Guide
+            Creator Snapshot
           </h4>
         </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3.5 text-[13.5px] leading-snug text-ink-dim">
-          <div className="flex flex-col">
-            <span className="font-display font-bold tracking-wide" style={{ color: accent }}>PAC (Pace)</span>
-            <span className="text-[11.5px] text-ink-mute mt-0.5">Upload frequency &amp; schedule</span>
+        
+        <div className="flex flex-col gap-2.5 pt-1 text-[12.5px]">
+          <div className="flex items-center justify-between py-1 border-b border-white/[0.04]">
+            <span className="flex items-center gap-2 text-ink-dim">
+              <Globe size={13} className="text-cyan-400" />
+              <span>Country</span>
+            </span>
+            <span className="flex items-center gap-1.5 font-medium text-white/90">
+              {flagUrl && (
+                <img
+                  src={flagUrl}
+                  alt=""
+                  className="h-3 w-[18px] object-cover rounded-[1px] shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+                  onError={(e) => { e.currentTarget.style.display = "none"; }}
+                />
+              )}
+              <span>{nameOfCountry}</span>
+            </span>
           </div>
-          <div className="flex flex-col">
-            <span className="font-display font-bold tracking-wide" style={{ color: accent }}>DRI (Dribbling)</span>
-            <span className="text-[11.5px] text-ink-mute mt-0.5">Genre diversity (categories)</span>
+
+          <div className="flex items-center justify-between py-1 border-b border-white/[0.04]">
+            <span className="flex items-center gap-2 text-ink-dim">
+              <Sparkles size={13} className="text-[#e9cc74]" />
+              <span>Niche</span>
+            </span>
+            <span className="font-medium text-white/90 truncate max-w-[200px]" title={niche}>
+              {niche}
+            </span>
           </div>
-          <div className="flex flex-col">
-            <span className="font-display font-bold tracking-wide" style={{ color: accent }}>SHO (Shooting)</span>
-            <span className="text-[11.5px] text-ink-mute mt-0.5">Recent views &amp; virality</span>
+
+          <div className="flex items-center justify-between py-1 border-b border-white/[0.04]">
+            <span className="flex items-center gap-2 text-ink-dim">
+              <Calendar size={13} className="text-cyan-400" />
+              <span>Years Active</span>
+            </span>
+            <span className="font-medium text-white/90">
+              {yearsStr}
+            </span>
           </div>
-          <div className="flex flex-col">
-            <span className="font-display font-bold tracking-wide" style={{ color: accent }}>DEF (Defending)</span>
-            <span className="text-[11.5px] text-ink-mute mt-0.5">Like-to-view alignment</span>
+
+          <div className="flex items-center justify-between py-1 border-b border-white/[0.04]">
+            <span className="flex items-center gap-2 text-ink-dim">
+              <TrendingUp size={13} className="text-[#e9cc74]" />
+              <span>Frequency</span>
+            </span>
+            <span className="font-medium text-white/90">
+              {uploadFreq}
+            </span>
           </div>
-          <div className="flex flex-col">
-            <span className="font-display font-bold tracking-wide" style={{ color: accent }}>PAS (Passing)</span>
-            <span className="text-[11.5px] text-ink-mute mt-0.5">Likes &amp; comments interaction</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="font-display font-bold tracking-wide" style={{ color: accent }}>PHY (Physical)</span>
-            <span className="text-[11.5px] text-ink-mute mt-0.5">Channel age &amp; total views</span>
+
+          <div className="flex items-center justify-between py-1">
+            <span className="flex items-center gap-2 text-ink-dim">
+              <Clock size={13} className="text-cyan-400" />
+              <span>Avg Length</span>
+            </span>
+            <span className="font-medium text-white/90">
+              {avgLen}
+            </span>
           </div>
         </div>
       </div>

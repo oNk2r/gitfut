@@ -11,7 +11,7 @@ export default function FooterCredit() {
       />
 
       <div className="relative flex flex-wrap items-center justify-center gap-x-[6px] gap-y-[4px] text-[13.5px] font-semibold leading-none text-ink-soft">
-        <span className="text-ink-mute">Inspired by</span>
+        <span className="text-ink-mute">forked from</span>
         <a
           href="https://gitfut.com"
           target="_blank"
